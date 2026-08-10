@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "skill": "investment-analysis",
+  "delivery": "local_markdown_discussion_card",
+  "local_artifact_contract": {
+    "directory": "mars-research",
+    "format": "markdown",
+    "unique_name_required": true,
+    "overwrite": "forbidden"
+  },
+  "input_contract": {
+    "required": "one of artifact_paths/drive_doc_id/case_id",
+    "unspecified_behavior": "list_workspace_manifest_candidates_only",
+    "incremental_only": true
+  },
+  "output": {
+    "formats": ["markdown", "json"],
+    "fields": [
+      "inputs_declared",
+      "new_evidence",
+      "assumption_changes",
+      "thesis_status",
+      "counter_arguments",
+      "open_questions",
+      "confidence",
+      "plan_revision",
+      "artifact_refs",
+      "escalation_proposal"
+    ]
+  },
+  "escalation": "proposal_only",
+  "response_fields": [
+    "research_as_of",
+    "inputs_declared",
+    "new_evidence",
+    "assumption_changes",
+    "thesis_status",
+    "counter_arguments",
+    "open_questions",
+    "confidence",
+    "plan_revision",
+    "local_artifact"
+  ],
+  "forbidden_effects": [
+    "broad_search",
+    "rerun_deep_research",
+    "auto_invoke_other_skills",
+    "account_access",
+    "broker_write",
+    "trade_execution",
+    "drive_write_without_confirmation",
+    "full_library_scan"
+  ],
+  "scenarios": [
+    {
+      "request": "基于 mars-research/2026-07-30-TEST-underwriting.md 和这份新公告，更新 case-test-001 的投研讨论。",
+      "expected": {
+        "research_as_of": "included",
+        "inputs_declared": "included",
+        "new_evidence": "included",
+        "thesis_status": "included",
+        "plan_revision": "proposal_only",
+        "local_artifact": "markdown_created"
+      }
+    }
+  ]
+}

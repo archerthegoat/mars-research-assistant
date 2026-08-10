@@ -1,0 +1,889 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-cleanco",
+    "listing_id": "CLEAN.US",
+    "case_id": "case-underwriting-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "symbol": "CLEAN.US",
+  "mode": "earnings_update",
+  "market_scope": "us",
+  "currency": "USD",
+  "research_as_of": "2026-08-01T00:00:00+00:00",
+  "issuer_identity": {
+    "status": "verified",
+    "request": {
+      "company_name": "CleanCo Inc.",
+      "ticker": "CLEAN.US",
+      "exchange": "NASDAQ"
+    },
+    "verified": {
+      "company_name": "CleanCo Inc.",
+      "ticker": "CLEAN.US",
+      "exchange": "NASDAQ",
+      "issuer": "CleanCo Inc."
+    },
+    "source": {
+      "name": "NASDAQ 上市信息页",
+      "kind": "exchange",
+      "as_of": "2026-07-30T12:00:00Z",
+      "url": "https://example.com/exchange/clean"
+    }
+  },
+  "accounting_baseline": {
+    "annual": [
+      {
+        "period": "FY2023",
+        "revenue": 2500.0,
+        "net_income": 500.0,
+        "operating_cash_flow": 520.0,
+        "gross_margin": 0.62,
+        "recurring_revenue_share": 0.55
+      },
+      {
+        "period": "FY2024",
+        "revenue": 2800.0,
+        "net_income": 560.0,
+        "operating_cash_flow": 575.0,
+        "gross_margin": 0.63,
+        "recurring_revenue_share": 0.58
+      },
+      {
+        "period": "FY2025",
+        "revenue": 3100.0,
+        "net_income": 620.0,
+        "operating_cash_flow": 640.0,
+        "gross_margin": 0.64,
+        "recurring_revenue_share": 0.61
+      }
+    ],
+    "quarters": [
+      {
+        "period": "2024Q3",
+        "revenue": 680.0,
+        "net_income": 132.0,
+        "operating_cash_flow": 138.0
+      },
+      {
+        "period": "2024Q4",
+        "revenue": 720.0,
+        "net_income": 145.0,
+        "operating_cash_flow": 150.0
+      },
+      {
+        "period": "2025Q1",
+        "revenue": 740.0,
+        "net_income": 148.0,
+        "operating_cash_flow": 152.0
+      },
+      {
+        "period": "2025Q2",
+        "revenue": 760.0,
+        "net_income": 152.0,
+        "operating_cash_flow": 158.0
+      },
+      {
+        "period": "2025Q3",
+        "revenue": 790.0,
+        "net_income": 158.0,
+        "operating_cash_flow": 162.0
+      },
+      {
+        "period": "2025Q4",
+        "revenue": 810.0,
+        "net_income": 162.0,
+        "operating_cash_flow": 168.0
+      },
+      {
+        "period": "2026Q1",
+        "revenue": 830.0,
+        "net_income": 168.0,
+        "operating_cash_flow": 172.0
+      },
+      {
+        "period": "2026Q2",
+        "revenue": 860.0,
+        "net_income": 175.0,
+        "operating_cash_flow": 180.0
+      }
+    ]
+  },
+  "industry": {
+    "industry_id": "software_internet"
+  },
+  "sections": {
+    "research_scope_hypothesis_trade_conclusion": [
+      {
+        "label": "研究范围",
+        "statement": "本报告覆盖 CleanCo 单一美国上市主体，离线 fixture 仅验证结构与可追溯性，不构成投资意见。",
+        "source": {
+          "name": "CleanCo 投资者关系页",
+          "kind": "issuer_ir",
+          "as_of": "2026-07-20T00:00:00Z",
+          "url": "https://example.com/cleanco/ir"
+        }
+      }
+    ],
+    "company_business_model_value_drivers": [
+      {
+        "label": "业务模式",
+        "statement": "CleanCo 以订阅制软件服务为主，经常性收入占比持续提升，价值驱动为客户留存与单位经济模型改善。",
+        "source": {
+          "name": "CleanCo FY2023-FY2025 10-K",
+          "kind": "sec_filing",
+          "as_of": "2026-02-15T00:00:00-05:00",
+          "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+        }
+      }
+    ],
+    "industry_structure_competition_counter_evidence": [
+      {
+        "label": "竞争格局",
+        "statement": "行业集中度提升，头部厂商以平台化扩张；CleanCo 在细分垂直领域保持份额。",
+        "source": {
+          "name": "行业基准率研究（可信媒体）",
+          "kind": "credible_media",
+          "as_of": "2026-06-30T00:00:00Z",
+          "url": "https://example.com/base-rate-study"
+        }
+      }
+    ],
+    "management_governance_capital_allocation": [
+      {
+        "label": "治理与资本配置",
+        "statement": "管理层近三年以回购与研发投入为主，未进行稀释性并购；审计意见为无保留。",
+        "source": {
+          "name": "CleanCo FY2023-FY2025 10-K",
+          "kind": "sec_filing",
+          "as_of": "2026-02-15T00:00:00-05:00",
+          "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+        }
+      }
+    ],
+    "financials_kpis_earnings_quality": [
+      {
+        "label": "财务摘要",
+        "statement": "收入与经营现金流三年连续增长，现金转换稳定；季度披露节奏完整。",
+        "source": {
+          "name": "CleanCo FY2023-FY2025 10-K",
+          "kind": "sec_filing",
+          "as_of": "2026-02-15T00:00:00-05:00",
+          "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+        }
+      }
+    ],
+    "expectation_gap_catalysts_base_rate_tracking": [
+      {
+        "label": "跟踪项",
+        "statement": "下一季度经常性收入增速与留存率为首要跟踪项。",
+        "source": {
+          "name": "CleanCo 2026Q2 业绩公告",
+          "kind": "issuer_announcement",
+          "as_of": "2026-07-29T14:00:00Z",
+          "url": "https://example.com/cleanco/q2"
+        }
+      }
+    ],
+    "reproducible_valuation_priced_in": [
+      {
+        "label": "估值背景",
+        "statement": "现价隐含的增长预期显著高于公司历史实现路径，预期差集中在增长持续性。",
+        "source": {
+          "name": "行业基准率研究（可信媒体）",
+          "kind": "credible_media",
+          "as_of": "2026-06-30T00:00:00Z",
+          "url": "https://example.com/base-rate-study"
+        }
+      }
+    ],
+    "counter_thesis_premortem_falsification": [
+      {
+        "label": "反方论点",
+        "statement": "反方认为经常性收入增速回落是结构性而非周期性，估值折价合理。",
+        "source": {
+          "name": "行业基准率研究（可信媒体）",
+          "kind": "credible_media",
+          "as_of": "2026-06-30T00:00:00Z",
+          "url": "https://example.com/base-rate-study"
+        }
+      }
+    ],
+    "sources_reconciliation_assumptions_data_gaps": [
+      {
+        "label": "对账说明",
+        "statement": "年度与季度基线均为 USD 口径，与估值、财报质量、交易方案 artifact 的币种一致。",
+        "source": {
+          "name": "CleanCo FY2023-FY2025 10-K",
+          "kind": "sec_filing",
+          "as_of": "2026-02-15T00:00:00-05:00",
+          "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+        }
+      }
+    ]
+  },
+  "expectation_gap": {
+    "narrative": [
+      {
+        "label": "预期差",
+        "statement": "市场按低增长成熟企业定价，但经常性收入占比与客户留存数据显示增长持续性被低估，分歧集中在 FY2027 之后的现金流路径。",
+        "source": {
+          "name": "行业基准率研究（可信媒体）",
+          "kind": "credible_media",
+          "as_of": "2026-06-30T00:00:00Z",
+          "url": "https://example.com/base-rate-study"
+        }
+      }
+    ],
+    "catalysts": [
+      {
+        "label": "催化剂",
+        "statement": "未来两个季度的经常性收入增速披露与大客户续约结果是预期差收敛的主要催化剂。",
+        "source": {
+          "name": "CleanCo 2026Q2 业绩公告",
+          "kind": "issuer_announcement",
+          "as_of": "2026-07-29T14:00:00Z",
+          "url": "https://example.com/cleanco/q2"
+        }
+      }
+    ],
+    "tracking": [
+      {
+        "label": "跟踪清单",
+        "statement": "经常性收入同比增速、客户留存率、经营现金流与净利润比率，按季度复核。",
+        "source": {
+          "name": "CleanCo 投资者关系页",
+          "kind": "issuer_ir",
+          "as_of": "2026-07-20T00:00:00Z",
+          "url": "https://example.com/cleanco/ir"
+        }
+      }
+    ]
+  },
+  "thesis": {
+    "identity": {
+      "issuer_id": "issuer-cleanco",
+      "listing_id": "CLEAN.US",
+      "case_id": "case-underwriting-001",
+      "artifact_version": 1,
+      "schema_version": 1
+    },
+    "independent_view": {
+      "present": true,
+      "statement": "市场把该公司定价为低增长成熟企业，但其经常性收入占比与客户留存数据显示增长持续性被低估，这是我们的独立分歧点。"
+    },
+    "preregistered_hypothesis": "未来 1-6 个月内，经常性收入增速与现金流转化将证明市场隐含的低增长预期过于悲观，概率加权公允价值高于当前价格区间。",
+    "falsification_conditions": [
+      "连续两个季度经常性收入同比增速低于 5%",
+      "经营现金流连续两年低于净利润的 50%",
+      "审计意见变为非无保留意见或出现重大内控缺陷"
+    ],
+    "counter_thesis": "反方认为经常性收入增速回落是结构性而非周期性，竞争加剧会持续压缩利润率，估值折价合理。",
+    "premortem": "假设方案失败，最可能的原因是：行业价格竞争超出预期导致利润率下修，同时技术支撑位失效，价值区间与收益风险假设同时恶化。",
+    "base_rate": {
+      "percentile": 0.7,
+      "source": {
+        "name": "历史同类案例基准率研究",
+        "kind": "credible_media",
+        "as_of": "2026-06-30T00:00:00Z",
+        "url": "https://example.com/base-rate-study"
+      },
+      "exceed_reason": "该公司客户留存率与单位经济模型处于历史同类案例的前 30%，存在结构性理由支持超越基准率。",
+      "verification_metrics": [
+        "经常性收入同比增速",
+        "客户留存率",
+        "经营现金流与净利润比率"
+      ]
+    },
+    "cash_question": {
+      "would_deploy": true,
+      "reason": "若今天这是一笔现金，在当前证据与预注册规则下愿意按条件式方案部署，因为价值带与技术支持区存在交集且收益风险比达标。"
+    }
+  },
+  "earnings_quality": {
+    "schema_version": 1,
+    "identity": {
+      "issuer_id": "issuer-cleanco",
+      "listing_id": "CLEAN.US",
+      "case_id": "case-underwriting-001",
+      "artifact_version": 1,
+      "schema_version": 1
+    },
+    "engine": "skills/deep-equity-research/scripts/earnings_quality.py",
+    "engine_version": "1.0.0",
+    "rules_version": "v1.0.3-eq-1",
+    "computed_as_of": "2026-07-31T09:00:00+08:00",
+    "market_scope": "us",
+    "currency": "USD",
+    "grade": "A",
+    "total_score": 100.0,
+    "provisional": false,
+    "provisional_reason": null,
+    "long_entry_veto": false,
+    "veto_reason": null,
+    "component_weights_applied": {
+      "accruals": 0.25,
+      "beneish": 0.2,
+      "revenue_recognition": 0.2,
+      "cash_flow": 0.2,
+      "audit_governance": 0.15
+    },
+    "components": {
+      "accruals": {
+        "status": "computed",
+        "score": 100.0,
+        "annual_ratios": [
+          {
+            "period": "FY2023",
+            "net_income": 500.0,
+            "operating_cash_flow": 520.0,
+            "total_assets": 4000.0,
+            "accrual_ratio": -0.005,
+            "deduction": 0.0,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "period": "FY2024",
+            "net_income": 560.0,
+            "operating_cash_flow": 575.0,
+            "total_assets": 4300.0,
+            "accrual_ratio": -0.003488,
+            "deduction": 0.0,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "period": "FY2025",
+            "net_income": 620.0,
+            "operating_cash_flow": 640.0,
+            "total_assets": 4600.0,
+            "accrual_ratio": -0.004348,
+            "deduction": 0.0,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          }
+        ],
+        "mean_accrual_ratio": -0.004279,
+        "evidence": [
+          "FY2023 应计比率 -0.005 = (500 - 520) / 4000（来源：CleanCo FY2023-FY2025 10-K，as_of：2026-02-15T00:00:00-05:00）",
+          "FY2024 应计比率 -0.003488 = (560 - 575) / 4300（来源：CleanCo FY2023-FY2025 10-K，as_of：2026-02-15T00:00:00-05:00）",
+          "FY2025 应计比率 -0.004348 = (620 - 640) / 4600（来源：CleanCo FY2023-FY2025 10-K，as_of：2026-02-15T00:00:00-05:00）",
+          "多年均值应计比率 -0.004279，未触发扣分。"
+        ]
+      },
+      "beneish": {
+        "status": "computed",
+        "score": 100.0,
+        "m_score": -2.448473,
+        "threshold": -1.78,
+        "manipulation_likely": false,
+        "variables": {
+          "DSRI": 0.967742,
+          "GMI": 0.984975,
+          "AQI": 1.05163,
+          "SGI": 1.068966,
+          "DEPI": 0.968553,
+          "SGAI": 0.978995,
+          "LVGI": 0.978261,
+          "TATA": -0.004348
+        },
+        "periods": {
+          "current": "FY2025",
+          "prior": "FY2024"
+        },
+        "evidence": [
+          "DSRI = 0.967742",
+          "GMI = 0.984975",
+          "AQI = 1.05163",
+          "SGI = 1.068966",
+          "DEPI = 0.968553",
+          "SGAI = 0.978995",
+          "LVGI = 0.978261",
+          "TATA = -0.004348",
+          "M-Score = -4.84 + Σ(系数×变量) = -2.448473；阈值 -1.78；M-Score <= -2.22，远低于操纵警戒线（来源：CleanCo FY2024-FY2025 10-K 财务报表，as_of：2026-02-15T00:00:00-05:00）"
+        ]
+      },
+      "revenue_recognition": {
+        "status": "computed",
+        "score": 100.0,
+        "red_flags": [
+          {
+            "id": "receivables_growth_exceeds_revenue_growth",
+            "triggered": false,
+            "value": -0.035,
+            "threshold": 0.1,
+            "deduct": 0.0,
+            "description": "应收账款增速 - 收入增速 > 10 个百分点：收入可能靠放松信用或提前确认堆出。",
+            "source": {
+              "name": "CleanCo FY2025 10-K 收入确认附注",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "id": "deferred_revenue_decline",
+            "triggered": false,
+            "value": 0.05,
+            "threshold": -0.1,
+            "deduct": 0.0,
+            "description": "递延收入同比下降超过 10%：未来已收款收入储备流失，可能透支收入确认。",
+            "source": {
+              "name": "CleanCo FY2025 10-K 收入确认附注",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "id": "related_party_revenue_share",
+            "triggered": false,
+            "value": 0.01,
+            "threshold": 0.05,
+            "deduct": 0.0,
+            "description": "关联方收入占比 > 5%：收入独立性存疑。",
+            "source": {
+              "name": "CleanCo FY2025 10-K 收入确认附注",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "id": "quarter_end_revenue_spike",
+            "triggered": false,
+            "value": 0.12,
+            "threshold": 0.3,
+            "deduct": 0.0,
+            "description": "期末突击收入占当季收入 > 30%：存在期末冲量确认迹象。",
+            "source": {
+              "name": "CleanCo FY2025 10-K 收入确认附注",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          }
+        ],
+        "evidence": [
+          "receivables_growth_exceeds_revenue_growth：观测值 -0.035，阈值 0.1，未触发。应收账款增速 - 收入增速 > 10 个百分点：收入可能靠放松信用或提前确认堆出。（来源：CleanCo FY2025 10-K 收入确认附注，as_of：2026-02-15T00:00:00-05:00）",
+          "deferred_revenue_decline：观测值 0.05，阈值 -0.1，未触发。递延收入同比下降超过 10%：未来已收款收入储备流失，可能透支收入确认。（来源：CleanCo FY2025 10-K 收入确认附注，as_of：2026-02-15T00:00:00-05:00）",
+          "related_party_revenue_share：观测值 0.01，阈值 0.05，未触发。关联方收入占比 > 5%：收入独立性存疑。（来源：CleanCo FY2025 10-K 收入确认附注，as_of：2026-02-15T00:00:00-05:00）",
+          "quarter_end_revenue_spike：观测值 0.12，阈值 0.3，未触发。期末突击收入占当季收入 > 30%：存在期末冲量确认迹象。（来源：CleanCo FY2025 10-K 收入确认附注，as_of：2026-02-15T00:00:00-05:00）"
+        ]
+      },
+      "cash_flow": {
+        "status": "computed",
+        "score": 100.0,
+        "ocf_ni_ratio_latest": 1.032258,
+        "fcf_positive_years": 3,
+        "years": 3,
+        "annual": [
+          {
+            "period": "FY2023",
+            "net_income": 500.0,
+            "operating_cash_flow": 520.0,
+            "free_cash_flow": 470.0,
+            "ocf_ni_ratio": 1.04,
+            "fcf_positive": true,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K 现金流量表",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "period": "FY2024",
+            "net_income": 560.0,
+            "operating_cash_flow": 575.0,
+            "free_cash_flow": 525.0,
+            "ocf_ni_ratio": 1.026786,
+            "fcf_positive": true,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K 现金流量表",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          },
+          {
+            "period": "FY2025",
+            "net_income": 620.0,
+            "operating_cash_flow": 640.0,
+            "free_cash_flow": 590.0,
+            "ocf_ni_ratio": 1.032258,
+            "fcf_positive": true,
+            "source": {
+              "name": "CleanCo FY2023-FY2025 10-K 现金流量表",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          }
+        ],
+        "evidence": [
+          "FY2023：OCF/NI 1.04，FCF 470（为正）（来源：CleanCo FY2023-FY2025 10-K 现金流量表，as_of：2026-02-15T00:00:00-05:00）",
+          "FY2024：OCF/NI 1.026786，FCF 525（为正）（来源：CleanCo FY2023-FY2025 10-K 现金流量表，as_of：2026-02-15T00:00:00-05:00）",
+          "FY2025：OCF/NI 1.032258，FCF 590（为正）（来源：CleanCo FY2023-FY2025 10-K 现金流量表，as_of：2026-02-15T00:00:00-05:00）",
+          "最近年度 OCF/NI 档得分 100（OCF/NI >= 1，利润有现金流支撑）；FCF 为正 3/3 年；组件得分 100.0。"
+        ]
+      },
+      "audit_governance": {
+        "status": "computed",
+        "score": 100.0,
+        "signals": [
+          {
+            "signal": "audit_opinion",
+            "severity": "none",
+            "detail": "unqualified",
+            "source": {
+              "name": "CleanCo FY2025 10-K 审计报告",
+              "kind": "sec_filing",
+              "as_of": "2026-02-15T00:00:00-05:00",
+              "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+            }
+          }
+        ],
+        "evidence": [
+          "审计意见 unqualified，基础分 100（来源：CleanCo FY2025 10-K 审计报告，as_of：2026-02-15T00:00:00-05:00）。",
+          "审计与治理组件得分 100.0。"
+        ]
+      }
+    },
+    "data_gaps": []
+  },
+  "valuation": {
+    "schema_version": 1,
+    "identity": {
+      "issuer_id": "issuer-cleanco",
+      "listing_id": "CLEAN.US",
+      "case_id": "case-underwriting-001",
+      "artifact_version": 1,
+      "schema_version": 1
+    },
+    "engine": "skills/deep-equity-research/scripts/dcf.py",
+    "engine_version": "1.0.0",
+    "model_version": "v1.0.3-valuation-1",
+    "computed_as_of": "2026-07-30T12:00:00Z",
+    "market_scope": "us",
+    "currency": "USD",
+    "results": {
+      "dcf": {
+        "status": "computed",
+        "scenarios": [
+          {
+            "name": "bear",
+            "probability": 0.25,
+            "enterprise_value": 1509.757335,
+            "equity_value": 1309.757335,
+            "per_share": 13.097573
+          },
+          {
+            "name": "base",
+            "probability": 0.5,
+            "enterprise_value": 1856.066623,
+            "equity_value": 1656.066623,
+            "per_share": 16.560666
+          },
+          {
+            "name": "bull",
+            "probability": 0.25,
+            "enterprise_value": 2202.375911,
+            "equity_value": 2002.375911,
+            "per_share": 20.023759
+          }
+        ],
+        "probability_weighted_per_share": 16.560666,
+        "terminal_value_checks": {
+          "long_run_growth": {
+            "status": "pass",
+            "detail": "永续增长率 0.0300 低于长期增长上限 0.0400。"
+          },
+          "mature_margin": {
+            "status": "pass",
+            "detail": "终值隐含成熟利润率峰值 0.1800 对照基准 0.1800。"
+          },
+          "reinvestment_roic_consistency": {
+            "status": "pass",
+            "detail": "再投资率与 g/ROIC 的最大偏差 0.0000（pass 容差 0.05）。"
+          }
+        },
+        "value_zone": {
+          "low": 13.097573,
+          "high": 16.560666
+        }
+      },
+      "reverse_dcf": {
+        "status": "computed",
+        "implied_fcf_cagr": 0.294207,
+        "horizon_years": 10,
+        "detail": "以当前价格隐含的 10 年自由现金流年化增长约 29.42%（搜索区间 -95.00% 至 300.00%）。"
+      },
+      "pvgo": {
+        "status": "computed",
+        "no_growth_value_per_share": 9.0,
+        "pvgo_per_share": 91.0,
+        "pvgo_share_of_price": 0.91,
+        "expectations_table": [
+          {
+            "metric": "price",
+            "value": 100.0,
+            "detail": "当前价格。"
+          },
+          {
+            "metric": "no_growth_value_per_share",
+            "value": 9.0,
+            "detail": "normalized_free_cash_flow / WACC − net_debt 的零增长近似，按股本摊薄。"
+          },
+          {
+            "metric": "pvgo_per_share",
+            "value": 91.0,
+            "detail": "当前价格中由未来增长预期支撑的部分（price − no_growth_value）。"
+          },
+          {
+            "metric": "pvgo_share_of_price",
+            "value": 0.91,
+            "detail": "PVGO 占当前价格的比例。"
+          },
+          {
+            "metric": "dcf_probability_weighted_per_share",
+            "value": 16.560666,
+            "detail": "三情景概率加权公允价值，与现价及零增长价值对照。"
+          }
+        ]
+      },
+      "epv": {
+        "status": "computed",
+        "adjusted_earnings": 92.5,
+        "enterprise_value": 925.0,
+        "equity_value": 725.0,
+        "epv_per_share": 7.25,
+        "detail": "EPV = (normalized_ebit × (1 − tax_rate) − maintenance_capex) / WACC − net_debt，按股本摊薄。"
+      },
+      "eva": {
+        "status": "computed",
+        "firm_value": 1211.408276,
+        "equity_value": 1011.408276,
+        "residual_income_per_share": 10.114083,
+        "detail": "剩余收益法：firm = invested_capital₀ + Σ EVA_t/(1+WACC)^t + EVA_{n+1}/(WACC−g)/(1+WACC)^n，其中 EVA_t = NOPAT_t − WACC × invested_capital_{t-1}，投入资本按 terminal_growth 外推。"
+      },
+      "sotp": {
+        "status": "computed",
+        "enterprise_value": 1757.805868,
+        "equity_value": 1382.025281,
+        "per_share": 13.820253,
+        "segments": [
+          {
+            "name": "core",
+            "model": "dcf",
+            "enterprise_value": 1207.805868
+          },
+          {
+            "name": "services",
+            "model": "epv",
+            "enterprise_value": 250.0
+          },
+          {
+            "name": "investments",
+            "model": "multiple",
+            "enterprise_value": 300.0
+          }
+        ],
+        "detail": "SOTP = Σ segment_enterprise_value × (1 − holding_discount) − net_debt，按股本摊薄。"
+      },
+      "monte_carlo": {
+        "status": "computed",
+        "base_model": "dcf",
+        "seed": 42,
+        "trials": 500,
+        "accepted_draws": 500,
+        "rejected_draws": 0,
+        "percentiles": {
+          "p10": 11.197603,
+          "p50": 15.196659,
+          "p90": 21.473479
+        }
+      }
+    },
+    "data_gaps": []
+  },
+  "trade_plan": {
+    "schema_version": 1,
+    "identity": {
+      "issuer_id": "issuer-cleanco",
+      "listing_id": "CLEAN.US",
+      "case_id": "case-underwriting-001",
+      "artifact_version": 1,
+      "schema_version": 1
+    },
+    "engine": "skills/deep-equity-research/scripts/trade_plan.py",
+    "engine_version": "1.0.0",
+    "rules_version": "v1.0.3-rules-1",
+    "computed_as_of": "2026-08-01T00:00:00+00:00",
+    "market_scope": "us",
+    "currency": "USD",
+    "direction": "long_only",
+    "horizon_months": {
+      "min": 1,
+      "max": 6
+    },
+    "status": "entry_plan",
+    "gates": {
+      "independent_view": {
+        "pass": true,
+        "reason": "独立观点与现金问题均已明确回答。"
+      },
+      "data_quality": {
+        "pass": true,
+        "reason": "可证伪条件、反方论证、事前预演与基准率材料齐全。"
+      },
+      "valuation": {
+        "pass": true,
+        "reason": "三情景 DCF 已计算，价值区间有效。"
+      },
+      "earnings_quality": {
+        "pass": true,
+        "reason": "财报质量等级 A，未触发否决。"
+      },
+      "technical_evidence": {
+        "pass": true,
+        "reason": "技术证据合格且在有效期内。"
+      },
+      "value_technical_intersection": {
+        "pass": true,
+        "reason": "价值带与技术支持区存在可解释交集。"
+      },
+      "reward_risk": {
+        "pass": true,
+        "reason": "收益风险比 8.121332 达到预注册下限。"
+      }
+    },
+    "veto": null,
+    "entry_plan": {
+      "zone": {
+        "low": 11.5,
+        "high": 12.5
+      },
+      "basis": "value_zone ∩ technical_support ± ATR",
+      "value_band": {
+        "low": 11.132937,
+        "high": 14.076566
+      },
+      "technical_support_zone": {
+        "low": 11.5,
+        "high": 12.5
+      },
+      "trigger_conditions": [
+        "价格进入入场区间且技术证据不晚于 2026-08-03T14:30:00+00:00。",
+        "入场前复核财报质量等级仍未触发否决。",
+        "预注册命题未被证伪条件触发。"
+      ]
+    },
+    "target_plan": {
+      "technical_target": {
+        "level": 13.0,
+        "source_level": {
+          "side": "resistance",
+          "price": 13.0
+        }
+      },
+      "fundamental_target": {
+        "level": 16.560666,
+        "basis": "probability_weighted"
+      }
+    },
+    "invalidation_plan": {
+      "technical_invalidation": {
+        "level": 11.0,
+        "rule": "support - 2×ATR14",
+        "reference_support": 12.0,
+        "atr14": 0.5
+      },
+      "thesis_invalidation": [
+        "连续两个季度经常性收入同比增速低于 5%",
+        "经营现金流连续两年低于净利润的 50%",
+        "审计意见变为非无保留意见或出现重大内控缺陷"
+      ]
+    },
+    "downside_pct": 0.043478,
+    "reward_risk_ratio": 8.121332,
+    "risk_triggers": [
+      "连续两个季度经常性收入同比增速低于 5%",
+      "经营现金流连续两年低于净利润的 50%",
+      "审计意见变为非无保留意见或出现重大内控缺陷"
+    ],
+    "references": {
+      "valuation_id": "valuation:case-underwriting-001:v1",
+      "evidence_id": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "earnings_quality_id": "earnings-quality:case-underwriting-001:v1"
+    },
+    "price_as_of": "2026-07-29T14:30:00Z",
+    "technical_valid_until": "2026-08-03T14:30:00+00:00",
+    "data_gaps": []
+  },
+  "technical_evidence_ref": {
+    "evidence_id": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "as_of": "2026-07-29T14:30:00Z",
+    "artifact_path": "technical-evidence.json",
+    "identity": {
+      "issuer_id": "issuer-cleanco",
+      "listing_id": "CLEAN.US",
+      "case_id": "case-underwriting-001",
+      "artifact_version": 1,
+      "schema_version": 1
+    }
+  },
+  "sources": [
+    {
+      "name": "NASDAQ 上市信息页",
+      "kind": "exchange",
+      "as_of": "2026-07-30T12:00:00Z",
+      "url": "https://example.com/exchange/clean"
+    },
+    {
+      "name": "CleanCo FY2023-FY2025 10-K",
+      "kind": "sec_filing",
+      "as_of": "2026-02-15T00:00:00-05:00",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000001"
+    },
+    {
+      "name": "CleanCo 投资者关系页",
+      "kind": "issuer_ir",
+      "as_of": "2026-07-20T00:00:00Z",
+      "url": "https://example.com/cleanco/ir"
+    },
+    {
+      "name": "CleanCo 2026Q2 业绩公告",
+      "kind": "issuer_announcement",
+      "as_of": "2026-07-29T14:00:00Z",
+      "url": "https://example.com/cleanco/q2"
+    },
+    {
+      "name": "行业基准率研究（可信媒体）",
+      "kind": "credible_media",
+      "as_of": "2026-06-30T00:00:00Z",
+      "url": "https://example.com/base-rate-study"
+    }
+  ],
+  "assumptions": [
+    "所有金额仅为离线验收示例，单位为 USD 百万（每股数据除外）。"
+  ],
+  "data_gaps": [
+    "本 fixture 不代表真实证券、实时数据或投资意见。"
+  ],
+  "prior_model_missing": true
+}

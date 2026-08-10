@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-gapco",
+    "listing_id": "GAPC.US",
+    "case_id": "case-gapco-2026",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "market_scope": "us",
+  "currency": "USD",
+  "computed_as_of": "2026-07-30T11:00:00Z",
+  "accounting_periods": {
+    "annual": ["FY2023", "FY2024", "FY2025"],
+    "quarters": [
+      "2024Q1", "2024Q2", "2024Q3", "2024Q4",
+      "2025Q1", "2025Q2", "2025Q3", "2025Q4"
+    ]
+  },
+  "components": {
+    "accruals": {
+      "annual": [
+        {"period": "FY2023", "net_income": 500, "operating_cash_flow": 520, "total_assets": 4000},
+        {"period": "FY2024", "net_income": 560, "operating_cash_flow": 575, "total_assets": 4300},
+        {"period": "FY2025", "net_income": 620, "operating_cash_flow": 640, "total_assets": 4600}
+      ],
+      "source": {
+        "name": "GapCo FY2023-FY2025 10-K",
+        "kind": "sec_filing",
+        "as_of": "2026-03-01T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000003"
+      }
+    },
+    "beneish": {
+      "comparable": true,
+      "current_period": "FY2025",
+      "prior_period": "FY2024",
+      "current": {
+        "revenue": 6200,
+        "cogs": 3400,
+        "receivables": 600,
+        "current_assets": 2200,
+        "net_ppe": 1500,
+        "total_assets": 4600,
+        "depreciation": 150,
+        "sga_expense": 900,
+        "total_liabilities": 1800,
+        "net_income": 620,
+        "operating_cash_flow": 640
+      },
+      "prior": {
+        "revenue": 5800,
+        "receivables": 580,
+        "current_assets": 2050,
+        "net_ppe": 1450,
+        "total_assets": 4300,
+        "sga_expense": 860,
+        "total_liabilities": 1720,
+        "net_income": 560,
+        "operating_cash_flow": 575
+      },
+      "source": {
+        "name": "GapCo FY2024-FY2025 10-K 财务报表（上年附注缺折旧与成本拆分）",
+        "kind": "sec_filing",
+        "as_of": "2026-03-01T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000003"
+      }
+    },
+    "revenue_recognition": {
+      "metrics": {
+        "receivables_growth": 0.034,
+        "revenue_growth": 0.069,
+        "deferred_revenue_change_pct": 0.05,
+        "related_party_revenue_share": 0.01,
+        "quarter_end_revenue_spike_share": 0.12
+      },
+      "source": {
+        "name": "GapCo FY2025 10-K 收入确认附注",
+        "kind": "sec_filing",
+        "as_of": "2026-03-01T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000003"
+      }
+    },
+    "cash_flow": {
+      "annual": [
+        {"period": "FY2023", "net_income": 500, "operating_cash_flow": 520, "free_cash_flow": 470},
+        {"period": "FY2024", "net_income": 560, "operating_cash_flow": 575, "free_cash_flow": 525},
+        {"period": "FY2025", "net_income": 620, "operating_cash_flow": 640, "free_cash_flow": 590}
+      ],
+      "source": {
+        "name": "GapCo FY2023-FY2025 10-K 现金流量表",
+        "kind": "sec_filing",
+        "as_of": "2026-03-01T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000003"
+      }
+    },
+    "audit_governance": {
+      "audit_opinion": "unqualified",
+      "auditor_change": false,
+      "material_weakness": false,
+      "governance_red_flags": [],
+      "source": {
+        "name": "GapCo FY2025 10-K 审计报告",
+        "kind": "sec_filing",
+        "as_of": "2026-03-01T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000003"
+      }
+    }
+  }
+}

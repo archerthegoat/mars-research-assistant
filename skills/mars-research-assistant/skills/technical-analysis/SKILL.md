@@ -21,7 +21,7 @@ description: 针对单一标的生成基于已完成日线的中文技术面分�
 1. 仅在首次实际技术面请求时，从本 Skill 目录运行 `bash scripts/ensure_yfinance_environment.sh`。
    它需要完整 Mars 运行包和已可用的 uv，按包根 `pyproject.toml`/`uv.lock` 创建包内 `.venv`；
    其余六个 Skill 不得触发此环境门。没有完整包或 uv 时停止并说明缺口，不临时拼装未锁定环境。
-2. 用包内 Python 调用 `scripts/analyze_with_yfinance.py --symbol SYMBOL --output-dir OUTPUT_DIR`。
+2. 用包内 Python 调用 `scripts/analyze_with_yfinance.py --symbol SYMBOL --output-dir OUTPUT_DIR`；若要让证据回绑既有案例，同时传入 `--issuer-id`、`--listing-id`、`--case-id` 三个身份参数（必须成组，listing_id 必须等于 symbol）。
    不绕开该脚本另写下载或分析逻辑。
 3. 合格时原子交付 `analysis.md` 和 `evidence.json`，共享 `evidence_id`；另在系统临时目录
    创建 `chart.html`，返回其路径和过期时间。聊天仅摘要结果，本地工件承载完整文字。

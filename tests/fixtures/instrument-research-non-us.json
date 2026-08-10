@@ -2,62 +2,99 @@
   "instrument": "7203.T",
   "research_as_of": "2026-07-26T09:00:00+09:00",
   "identity": {
-    "issuer": "Toyota Motor Corporation（非美国发行人）",
+    "status": "verified",
+    "request": {
+      "company_name": "Toyota Motor Corporation",
+      "ticker": "7203.T",
+      "exchange": "TSE"
+    },
+    "verified": {
+      "company_name": "Toyota Motor Corporation",
+      "ticker": "7203.T",
+      "exchange": "TSE",
+      "issuer": "Toyota Motor Corporation"
+    },
     "source": {
       "name": "年度证券报告",
       "kind": "regulatory_filing",
-      "url": "https://disclosure2dl.edinet-fsa.go.jp/example",
-      "as_of": "2026-06-25"
+      "as_of": "2026-06-25T00:00:00+09:00",
+      "url": "https://disclosure2dl.edinet-fsa.go.jp/example"
     }
   },
-  "fundamentals": [
+  "key_public_data": [
     {
-      "label": "财务披露",
-      "statement": "发行人通过适用监管披露提供年度财务资料。",
+      "kind": "price",
+      "label": "收盘价",
+      "value": "2850 JPY",
+      "source": {
+        "name": "东京证券交易所收盘行情",
+        "kind": "public_quote",
+        "as_of": "2026-07-24T15:00:00+09:00",
+        "url": "https://example.com/quote/7203t"
+      }
+    },
+    {
+      "kind": "market_scale_or_valuation_anchor",
+      "label": "市值",
+      "value": "37.3tn JPY",
+      "source": {
+        "name": "东京证券交易所收盘行情",
+        "kind": "public_quote",
+        "as_of": "2026-07-24T15:00:00+09:00",
+        "url": "https://example.com/quote/7203t"
+      }
+    },
+    {
+      "kind": "latest_financial_summary",
+      "label": "最近财年收入",
+      "value": "离线验收示例：最近财年收入以适用监管披露为准。",
       "source": {
         "name": "年度证券报告",
         "kind": "regulatory_filing",
-        "url": "https://disclosure2dl.edinet-fsa.go.jp/example",
-        "as_of": "2026-06-25"
+        "as_of": "2026-06-25T00:00:00+09:00",
+        "url": "https://disclosure2dl.edinet-fsa.go.jp/example"
       }
     }
   ],
-  "industry_context": [
+  "recent_company_updates": [
     {
-      "label": "行业环境",
-      "statement": "发行人在监管披露的经营讨论中说明汽车业务环境。",
-      "source": {
-        "name": "年度证券报告",
-        "kind": "regulatory_filing",
-        "url": "https://disclosure2dl.edinet-fsa.go.jp/example",
-        "as_of": "2026-06-25"
-      }
-    }
-  ],
-  "company_events": [
-    {
-      "label": "业绩材料",
-      "statement": "发行人 IR 已发布最近一期业绩材料。",
+      "title": "发布最近一期业绩材料",
+      "issuer": "Toyota Motor Corporation",
+      "summary": "发行人 IR 发布最近一期业绩材料。",
+      "published_on": "2026-07-08",
       "source": {
         "name": "业绩发布资料",
-        "kind": "issuer_ir",
-        "url": "https://global.toyota/en/ir/example",
-        "as_of": "2026-05-08"
+        "kind": "issuer_announcement",
+        "as_of": "2026-07-08T15:00:00+09:00",
+        "url": "https://global.toyota/en/ir/example-results"
       }
-    }
-  ],
-  "inferences": [
+    },
     {
-      "label": "后续验证",
-      "statement": "应继续以适用监管披露和发行人更新验证经营环境变化。",
-      "validation_condition": "后续监管披露或发行人业绩材料确认经营环境变化。",
+      "title": "电动化战略进展报道",
+      "issuer": "Toyota Motor Corporation",
+      "summary": "可信媒体报道发行人电动化战略进展。",
+      "published_on": "2026-07-15",
       "source": {
-        "name": "年度证券报告",
-        "kind": "regulatory_filing",
-        "url": "https://disclosure2dl.edinet-fsa.go.jp/example",
-        "as_of": "2026-06-25"
+        "name": "可信财经媒体报道",
+        "kind": "credible_media",
+        "as_of": "2026-07-15T09:00:00+09:00",
+        "url": "https://example.com/news/toyota-ev"
+      }
+    },
+    {
+      "title": "召开定期股东大会",
+      "issuer": "Toyota Motor Corporation",
+      "summary": "发行人召开定期股东大会并公布决议。",
+      "published_on": "2026-06-27",
+      "source": {
+        "name": "股东大会公告",
+        "kind": "issuer_announcement",
+        "as_of": "2026-06-27T09:00:00+09:00",
+        "url": "https://global.toyota/en/ir/example-agm"
       }
     }
   ],
-  "data_gaps": []
+  "data_gaps": [
+    "fixture 不代表实时价格、估值或交易建议；非美国发行人以适用监管披露为准。"
+  ]
 }

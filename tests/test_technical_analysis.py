@@ -82,6 +82,88 @@ class TechnicalAnalysisArtifactTests(unittest.TestCase):
         self.assertIsInstance(parsed, dict)
         return parsed
 
+    def test_fixture_identity_is_carried_into_the_evidence_payload(self) -> None:
+        identity = {
+            "issuer_id": "issuer-demo",
+            "listing_id": "DEMO.US",
+            "case_id": "case-demo-001",
+            "artifact_version": 1,
+            "schema_version": 1,
+        }
+        with tempfile.TemporaryDirectory(prefix="technical-analysis-test-") as temporary:
+            directory = Path(temporary)
+
+            def add_identity(fixture: dict[str, object]) -> None:
+                fixture["identity"] = dict(identity)
+
+            fixture_path = self._write_fixture(directory, add_identity)
+            output_dir = directory / "mars-research" / "artifacts"
+
+            result = self._render(fixture_path, output_dir)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            evidence = json.loads(
+                (output_dir / "evidence.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(evidence["identity"], identity)
+        self.assertEqual(evidence["schema_version"], 1)
+
+    def test_invalid_fixture_identity_is_rejected_without_artifacts(self) -> None:
+        cases = (
+            ("missing-case-id", lambda identity: identity.pop("case_id")),
+            (
+                "non-one-schema-version",
+                lambda identity: identity.update({"schema_version": 2}),
+            ),
+            (
+                "non-one-artifact-version",
+                lambda identity: identity.update({"artifact_version": 3}),
+            ),
+        )
+        for name, mutate in cases:
+            with self.subTest(case=name), tempfile.TemporaryDirectory(
+                prefix="technical-analysis-test-"
+            ) as temporary:
+                directory = Path(temporary)
+
+                def add_identity(fixture: dict[str, object]) -> None:
+                    identity = {
+                        "issuer_id": "issuer-demo",
+                        "listing_id": "DEMO.US",
+                        "case_id": "case-demo-001",
+                        "artifact_version": 1,
+                        "schema_version": 1,
+                    }
+                    mutate(identity)
+                    fixture["identity"] = identity
+
+                fixture_path = self._write_fixture(directory, add_identity)
+                output_dir = directory / "mars-research" / "artifacts"
+
+                result = self._render(fixture_path, output_dir)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("identity", result.stdout + result.stderr)
+                self.assertFalse(output_dir.exists())
+
+    def test_provider_timestamp_after_research_as_of_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="technical-analysis-test-") as temporary:
+            directory = Path(temporary)
+
+            def move_provider_into_the_future(fixture: dict[str, object]) -> None:
+                provider = fixture["provider"]
+                assert isinstance(provider, dict)
+                provider["as_of"] = "2027-01-01T00:00:00Z"
+
+            fixture_path = self._write_fixture(directory, move_provider_into_the_future)
+            output_dir = directory / "mars-research" / "artifacts"
+            result = self._render(fixture_path, output_dir)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("provider as_of must not be after research_as_of", result.stderr)
+        self.assertFalse(output_dir.exists())
+
     def test_qualified_daily_history_creates_one_consistent_artifact_package(
         self,
     ) -> None:
@@ -234,6 +316,43 @@ class TechnicalAnalysisArtifactTests(unittest.TestCase):
         self.assertNotIn("## 关键位", markdown)
         self.assertNotIn("## 条件情景与失效", markdown)
         self.assertNotIn("<svg", markdown)
+
+    def test_zero_close_bar_fails_closed_with_failure_package(self) -> None:
+        # close=0（及同类零/负价格）必须转为 DataQualityError 失败包，
+        # 而不是派生指标里的 ZeroDivisionError traceback。
+        with tempfile.TemporaryDirectory(prefix="technical-analysis-test-") as temporary:
+            directory = Path(temporary)
+
+            def zero_last_close(fixture: dict[str, object]) -> None:
+                ohlcv = fixture["ohlcv"]
+                assert isinstance(ohlcv, dict)
+                bars = ohlcv["bars"]
+                assert isinstance(bars, list)
+                last = bars[-1]
+                assert isinstance(last, dict)
+                last["open"] = 0
+                last["high"] = 0
+                last["low"] = 0
+                last["close"] = 0
+
+            fixture_path = self._write_fixture(directory, zero_last_close)
+            output_dir = directory / "mars-research" / "artifacts"
+
+            result = self._render(fixture_path, output_dir)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+            self.assertEqual(
+                [path.name for path in output_dir.iterdir()],
+                ["analysis.md"],
+            )
+            delivery = self._delivery(result)
+            markdown = (output_dir / "analysis.md").read_text(encoding="utf-8")
+
+        self.assertEqual(delivery["artifacts"], ["analysis.md"])
+        self.assertFalse(delivery["visualization"]["generated"])
+        self.assertIn("positive prices", markdown)
+        self.assertIn("## 数据缺口", markdown)
 
     def test_one_expanded_window_retry_can_recover_short_history(self) -> None:
         with tempfile.TemporaryDirectory(prefix="technical-analysis-test-") as temporary:

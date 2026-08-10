@@ -1,4 +1,4 @@
 interface:
   display_name: "Ask Mars"
-  short_description: "主动规划下一步美股交易研究"
-  default_prompt: "使用 $ask-mars 主动规划今天的交易研究；未指定市场时按美股默认给出可直接开始的最小流程。"
+  short_description: "主动规划下一步交易研究"
+  default_prompt: "使用 $ask-mars 主动规划今天的交易研究；未指定市场时先按市场偏好引导选择（不默认美股），再给出可直接开始的最小流程。"

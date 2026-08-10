@@ -1,0 +1,4 @@
+interface:
+  display_name: "投研分析"
+  short_description: "基于用户明确指定的研究 artifact 做轻量增量讨论并输出讨论卡"
+  default_prompt: "使用 $investment-analysis 对我指定的研究 artifact 做增量投研讨论，输出讨论卡。"

@@ -8,10 +8,10 @@
     "unique_name_required": true,
     "overwrite": "forbidden"
   },
-  "default_market": {
-    "when_unspecified": "US equities",
-    "currency": "USD",
-    "timezone": "America/New_York",
+  "market_scope_guidance": {
+    "preference_file": "mars-market-preferences.json",
+    "unset_behavior": "recommend_market_onboarding_multi_select",
+    "no_default_us": true,
     "user_timezone_does_not_select_market": true,
     "explicit_market_overrides": true
   },
@@ -43,10 +43,8 @@
         "first_step": "市场催化剂简报",
         "minimum_input": [],
         "assumptions": {
-          "market": "US equities",
-          "currency": "USD",
-          "timezone": "America/New_York",
-          "catalyst_window": "next week"
+          "catalyst_window": "next week",
+          "market_scope": "preference_or_explicit"
         },
         "quick_replies": [
           "开始市场催化剂简报",
@@ -66,10 +64,8 @@
           "新的 output_dir"
         ],
         "assumptions": {
-          "market": "US equities",
-          "currency": "USD",
-          "timezone": "America/New_York",
-          "timeframe": "1D"
+          "timeframe": "1D",
+          "market_scope": "preference_or_explicit"
         },
         "quick_replies": [
           "提供 output_dir",
@@ -92,10 +88,8 @@
         "first_step": "市场快照",
         "minimum_input": [],
         "assumptions": {
-          "market": "US equities",
-          "currency": "USD",
-          "timezone": "America/New_York",
-          "catalyst_window": "next 7 calendar days"
+          "catalyst_window": "next 7 calendar days",
+          "market_scope": "preference_or_explicit"
         },
         "quick_replies": [
           "开始",
@@ -119,15 +113,34 @@
         "first_step": "市场快照",
         "minimum_input": [],
         "assumptions": {
-          "market": "US equities",
-          "currency": "USD",
-          "timezone": "America/New_York",
-          "catalyst_window": "next 7 calendar days"
+          "catalyst_window": "next 7 calendar days",
+          "market_scope": "preference_or_explicit"
         },
         "quick_replies": [
           "开始",
           "只看市场快照",
           "添加 ticker"
+        ],
+        "local_artifact": "markdown_created"
+      }
+    },
+    {
+      "request": "基于上周的深度研究 artifact，讨论一下新公告对方案的影响。",
+      "expected": {
+        "recommended_skills": [
+          "投研分析"
+        ],
+        "first_step": "投研分析",
+        "minimum_input": [
+          "本地 artifact 路径、Drive 文档 ID 或 case_id"
+        ],
+        "assumptions": {
+          "incremental_only": true,
+          "auto_invoke_deep_research": false
+        },
+        "quick_replies": [
+          "提供 artifact 路径",
+          "提供 case_id"
         ],
         "local_artifact": "markdown_created"
       }

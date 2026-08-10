@@ -20,11 +20,15 @@
     },
     {
       "id": "deep-equity-research",
-      "display_name": "深度个股研究"
+      "display_name": "深度研究"
     },
     {
       "id": "technical-analysis",
       "display_name": "技术面分析"
+    },
+    {
+      "id": "investment-analysis",
+      "display_name": "投研分析"
     },
     {
       "id": "drive-writeback",

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-accrualco",
+    "listing_id": "ACCR.US",
+    "case_id": "case-accrualco-2026",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "market_scope": "us",
+  "currency": "USD",
+  "computed_as_of": "2026-07-30T11:00:00Z",
+  "accounting_periods": {
+    "annual": ["FY2023", "FY2024", "FY2025"],
+    "quarters": [
+      "2024Q1", "2024Q2", "2024Q3", "2024Q4",
+      "2025Q1", "2025Q2", "2025Q3", "2025Q4"
+    ]
+  },
+  "components": {
+    "accruals": {
+      "annual": [
+        {"period": "FY2023", "net_income": 300, "operating_cash_flow": 60, "total_assets": 4000},
+        {"period": "FY2024", "net_income": 340, "operating_cash_flow": 40, "total_assets": 4400},
+        {"period": "FY2025", "net_income": 380, "operating_cash_flow": 50, "total_assets": 4800}
+      ],
+      "source": {
+        "name": "AccrualCo FY2023-FY2025 10-K",
+        "kind": "sec_filing",
+        "as_of": "2026-02-20T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000002"
+      }
+    },
+    "beneish": {
+      "comparable": true,
+      "current_period": "FY2025",
+      "prior_period": "FY2024",
+      "current": {
+        "revenue": 5400,
+        "cogs": 2700,
+        "receivables": 844,
+        "current_assets": 1800,
+        "net_ppe": 1200,
+        "total_assets": 4800,
+        "depreciation": 120,
+        "sga_expense": 600,
+        "total_liabilities": 2000,
+        "net_income": 380,
+        "operating_cash_flow": 50
+      },
+      "prior": {
+        "revenue": 4000,
+        "cogs": 1900,
+        "receivables": 500,
+        "current_assets": 1600,
+        "net_ppe": 1150,
+        "total_assets": 4400,
+        "depreciation": 120,
+        "sga_expense": 400,
+        "total_liabilities": 1760,
+        "net_income": 340,
+        "operating_cash_flow": 40
+      },
+      "source": {
+        "name": "AccrualCo FY2024-FY2025 10-K 财务报表",
+        "kind": "sec_filing",
+        "as_of": "2026-02-20T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000002"
+      }
+    },
+    "revenue_recognition": {
+      "metrics": {
+        "receivables_growth": 0.25,
+        "revenue_growth": 0.1,
+        "deferred_revenue_change_pct": -0.05,
+        "related_party_revenue_share": 0.08,
+        "quarter_end_revenue_spike_share": 0.2
+      },
+      "source": {
+        "name": "AccrualCo FY2025 10-K 收入确认附注",
+        "kind": "sec_filing",
+        "as_of": "2026-02-20T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000002"
+      }
+    },
+    "cash_flow": {
+      "annual": [
+        {"period": "FY2023", "net_income": 300, "operating_cash_flow": 60, "free_cash_flow": 20},
+        {"period": "FY2024", "net_income": 340, "operating_cash_flow": 40, "free_cash_flow": -10},
+        {"period": "FY2025", "net_income": 380, "operating_cash_flow": 50, "free_cash_flow": 5}
+      ],
+      "source": {
+        "name": "AccrualCo FY2023-FY2025 10-K 现金流量表",
+        "kind": "sec_filing",
+        "as_of": "2026-02-20T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000002"
+      }
+    },
+    "audit_governance": {
+      "audit_opinion": "unqualified",
+      "auditor_change": true,
+      "material_weakness": false,
+      "governance_red_flags": [],
+      "source": {
+        "name": "AccrualCo FY2025 10-K 审计报告与 8-K 审计师变更公告",
+        "kind": "sec_filing",
+        "as_of": "2026-02-20T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000002"
+      }
+    }
+  }
+}

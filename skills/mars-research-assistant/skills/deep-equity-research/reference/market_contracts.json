@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "contract_version": "v1.0.3-market-1",
+  "scopes": {
+    "us": {
+      "exchanges": ["NYSE", "NASDAQ"],
+      "suffixes": ["", ".US"],
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "accounting": "US GAAP / IFRS(外国发行人)",
+      "disclosure_sources": ["sec_filing", "issuer_ir", "exchange"],
+      "identity_fields": ["company_name", "ticker", "exchange", "issuer"]
+    },
+    "hk": {
+      "exchanges": ["HKEX"],
+      "suffixes": [".HK"],
+      "currency": "HKD",
+      "timezone": "Asia/Hong_Kong",
+      "accounting": "HKFRS/IFRS",
+      "disclosure_sources": ["regulatory_filing", "issuer_ir", "exchange"],
+      "identity_fields": ["company_name", "ticker", "exchange", "issuer"]
+    },
+    "a_share": {
+      "exchanges": ["SSE", "SZSE"],
+      "suffixes": [".SS", ".SH", ".SZ"],
+      "currency": "CNY",
+      "timezone": "Asia/Shanghai",
+      "accounting": "CAS",
+      "disclosure_sources": ["regulatory_filing", "issuer_ir", "exchange"],
+      "identity_fields": ["company_name", "ticker", "exchange", "issuer"]
+    },
+    "ah_compare": {
+      "requires": ["a_share", "hk"],
+      "fx_pair": "CNY/HKD",
+      "must_report": [
+        "fx_rate",
+        "share_right_ratio",
+        "liquidity_diff",
+        "trading_day_diff",
+        "premium_discount"
+      ],
+      "pair_failure": "无法唯一配对时停止并澄清",
+      "identity_note": "A/H 对比共用一个 case_id、两个 listing_id。"
+    }
+  },
+  "vie_adr": {
+    "triggers": ["在美上市中国发行人"],
+    "must_identify": [
+      "adr_conversion_ratio",
+      "listing_regulator",
+      "delisting_or_conversion_risk",
+      "vie_contract_control_risk"
+    ],
+    "scenario_discount_rule": "只在有可靠证据时纳入情景/折价；禁止固定一刀切折价。"
+  }
+}

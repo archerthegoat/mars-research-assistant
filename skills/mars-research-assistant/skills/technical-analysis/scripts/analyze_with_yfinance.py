@@ -77,6 +77,7 @@ def build_yfinance_fixture(
     *,
     ticker_factory: Callable[[str], Any],
     now: datetime,
+    identity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Download at most twice from yfinance, widening only the history period."""
     normalized_symbol = symbol.strip().upper()
@@ -131,7 +132,28 @@ def build_yfinance_fixture(
         fixture["attempts"] = attempts
     if not qualified and download_error is not None:
         fixture["source_error"] = type(download_error).__name__
+    if identity is not None:
+        fixture["identity"] = identity
     return fixture
+
+
+def _identity_from_arguments(arguments: argparse.Namespace) -> dict[str, Any] | None:
+    values = (arguments.issuer_id, arguments.listing_id, arguments.case_id)
+    if any(value is not None for value in values) and not all(
+        isinstance(value, str) and value.strip() for value in values
+    ):
+        raise TechnicalAnalysisError(
+            "--issuer-id, --listing-id, and --case-id must be provided together"
+        )
+    if not all(value is not None for value in values):
+        return None
+    return {
+        "issuer_id": arguments.issuer_id.strip(),
+        "listing_id": arguments.listing_id.strip().upper(),
+        "case_id": arguments.case_id.strip(),
+        "artifact_version": 1,
+        "schema_version": 1,
+    }
 
 
 def load_market_context(path: Path) -> dict[str, Any]:
@@ -165,6 +187,9 @@ def main() -> int:
     )
     parser.add_argument("--symbol", required=True)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--issuer-id", help="case issuer_id for evidence binding")
+    parser.add_argument("--listing-id", help="case listing_id; must match --symbol")
+    parser.add_argument("--case-id", help="case_id for evidence binding")
     parser.add_argument("--market-context", type=Path)
     parser.add_argument(
         "--no-open",
@@ -180,6 +205,7 @@ def main() -> int:
             arguments.symbol,
             ticker_factory=yfinance.Ticker,
             now=now,
+            identity=_identity_from_arguments(arguments),
         )
         if arguments.market_context is not None:
             fixture["market_context"] = load_market_context(

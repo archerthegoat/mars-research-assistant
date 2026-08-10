@@ -1,0 +1,504 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-tradeplan",
+    "listing_id": "TP.SS",
+    "case_id": "case-tradeplan-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "market_scope": "ah_compare",
+  "currency": "CNY",
+  "computed_as_of": "2026-07-30T12:00:00Z",
+  "models": {
+    "dcf": {
+      "status": "requested",
+      "price": {
+        "value": 100.0,
+        "source": {
+          "name": "Example public quote",
+          "kind": "public_quote",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/quote"
+        }
+      },
+      "shares_outstanding": {
+        "value": 100.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/shares"
+        }
+      },
+      "net_debt": {
+        "value": 200.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/debt"
+        }
+      },
+      "wacc": {
+        "value": 0.1,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/wacc"
+        },
+        "derivation": "离线验收示例：CAPM 推导记录。"
+      },
+      "terminal_growth": {
+        "value": 0.03,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/growth"
+        }
+      },
+      "long_run_growth_cap": {
+        "value": 0.04,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/growth-cap"
+        }
+      },
+      "mature_margin_benchmark": {
+        "value": 0.18,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/margin-benchmark"
+        }
+      },
+      "scenarios": [
+        {
+          "name": "bear",
+          "probability": {
+            "value": 0.25,
+            "rationale": "离线验收示例：下行情景概率。"
+          },
+          "free_cash_flows": [
+            100,
+            105,
+            110,
+            115,
+            120
+          ],
+          "margins": [
+            0.14,
+            0.14,
+            0.14,
+            0.14,
+            0.14
+          ],
+          "reinvestment_rate": {
+            "value": 0.3
+          },
+          "roic": {
+            "value": 0.1
+          },
+          "source": {
+            "name": "Example bear case",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/bear"
+          }
+        },
+        {
+          "name": "base",
+          "probability": {
+            "value": 0.5,
+            "rationale": "离线验收示例：中性情景概率。"
+          },
+          "free_cash_flows": [
+            110,
+            120,
+            130,
+            140,
+            150
+          ],
+          "margins": [
+            0.16,
+            0.16,
+            0.16,
+            0.16,
+            0.16
+          ],
+          "reinvestment_rate": {
+            "value": 0.3
+          },
+          "roic": {
+            "value": 0.1
+          },
+          "source": {
+            "name": "Example base case",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/base"
+          }
+        },
+        {
+          "name": "bull",
+          "probability": {
+            "value": 0.25,
+            "rationale": "离线验收示例：上行情景概率。"
+          },
+          "free_cash_flows": [
+            120,
+            135,
+            150,
+            165,
+            180
+          ],
+          "margins": [
+            0.18,
+            0.18,
+            0.18,
+            0.18,
+            0.18
+          ],
+          "reinvestment_rate": {
+            "value": 0.3
+          },
+          "roic": {
+            "value": 0.1
+          },
+          "source": {
+            "name": "Example bull case",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/bull"
+          }
+        }
+      ]
+    },
+    "reverse_dcf": {
+      "status": "requested",
+      "current_free_cash_flow": {
+        "value": 100.0,
+        "source": {
+          "name": "Example cash-flow",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/cash-flow"
+        }
+      },
+      "horizon_years": {
+        "value": 10,
+        "source": {
+          "name": "Example horizon",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/horizon"
+        }
+      }
+    },
+    "pvgo": {
+      "status": "requested",
+      "normalized_free_cash_flow": {
+        "value": 110.0,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/normalized-fcf"
+        }
+      },
+      "wacc": {
+        "value": 0.1,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/wacc"
+        }
+      },
+      "net_debt": {
+        "value": 200.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/debt"
+        }
+      },
+      "shares_outstanding": {
+        "value": 100.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/shares"
+        }
+      },
+      "price": {
+        "value": 100.0,
+        "source": {
+          "name": "Example public quote",
+          "kind": "public_quote",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/quote"
+        }
+      }
+    },
+    "epv": {
+      "status": "requested",
+      "normalized_ebit": {
+        "value": 150.0,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/normalized-ebit"
+        }
+      },
+      "tax_rate": {
+        "value": 0.25,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/tax"
+        }
+      },
+      "maintenance_capex": {
+        "value": 20.0,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/capex"
+        }
+      },
+      "wacc": {
+        "value": 0.1,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/wacc"
+        }
+      },
+      "net_debt": {
+        "value": 200.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/debt"
+        }
+      },
+      "shares_outstanding": {
+        "value": 100.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/shares"
+        }
+      },
+      "price": {
+        "value": 100.0,
+        "source": {
+          "name": "Example public quote",
+          "kind": "public_quote",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/quote"
+        }
+      }
+    },
+    "eva": {
+      "status": "requested",
+      "nopat_path": [
+        100,
+        108,
+        116,
+        124,
+        132
+      ],
+      "invested_capital_start": {
+        "value": 1000.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/invested-capital"
+        }
+      },
+      "wacc": {
+        "value": 0.1,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/wacc"
+        }
+      },
+      "terminal_growth": {
+        "value": 0.03,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/growth"
+        }
+      },
+      "net_debt": {
+        "value": 200.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/debt"
+        }
+      },
+      "shares_outstanding": {
+        "value": 100.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/shares"
+        }
+      }
+    },
+    "sotp": {
+      "status": "requested",
+      "segments": [
+        {
+          "name": "core",
+          "model": "dcf",
+          "inputs": {
+            "free_cash_flows": [
+              80,
+              84,
+              88,
+              92,
+              96
+            ],
+            "wacc": {
+              "value": 0.1
+            },
+            "terminal_growth": {
+              "value": 0.03
+            }
+          },
+          "source": {
+            "name": "Example core segment",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/segment-core"
+          }
+        },
+        {
+          "name": "services",
+          "model": "epv",
+          "inputs": {
+            "normalized_ebit": {
+              "value": 40.0
+            },
+            "tax_rate": {
+              "value": 0.25
+            },
+            "maintenance_capex": {
+              "value": 5.0
+            },
+            "wacc": {
+              "value": 0.1
+            }
+          },
+          "source": {
+            "name": "Example services segment",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/segment-services"
+          }
+        },
+        {
+          "name": "investments",
+          "model": "multiple",
+          "inputs": {
+            "metric_value": {
+              "value": 100.0
+            },
+            "multiple": {
+              "value": 3.0
+            }
+          },
+          "source": {
+            "name": "Example investments segment",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/segment-investments"
+          }
+        }
+      ],
+      "net_debt": {
+        "value": 200.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/debt"
+        }
+      },
+      "shares_outstanding": {
+        "value": 100.0,
+        "source": {
+          "name": "Example filing",
+          "kind": "regulatory_filing",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/shares"
+        }
+      },
+      "holding_discount": {
+        "value": 0.1,
+        "source": {
+          "name": "Example assumption",
+          "kind": "valuation_assumption",
+          "as_of": "2026-07-30T00:00:00Z",
+          "url": "https://example.com/holding-discount"
+        }
+      }
+    },
+    "monte_carlo": {
+      "status": "requested",
+      "base_model": "dcf",
+      "trials": 500,
+      "seed": 42,
+      "distributions": {
+        "wacc": {
+          "low": 0.08,
+          "high": 0.12
+        },
+        "terminal_growth": {
+          "low": 0.015,
+          "high": 0.035
+        },
+        "fcf_growth": {
+          "low": 0.0,
+          "high": 0.12
+        }
+      }
+    }
+  },
+  "ah_compare": {
+    "pair": {
+      "a_share_listing_id": "TP.SS",
+      "hk_listing_id": "TP.HK"
+    },
+    "fx_pair": "CNY/HKD",
+    "fx_rate": 1.09,
+    "share_right_ratio": 1.0,
+    "liquidity_diff": "离线验收示例：A 股与 H 股流动性差异已记录。",
+    "trading_day_diff": "离线验收示例：两地交易日历差异已核对。",
+    "premium_discount": 0.12
+  }
+}

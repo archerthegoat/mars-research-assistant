@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "example-issuer",
+    "listing_id": "TEST.US",
+    "case_id": "case-test-001"
+  },
+  "research_as_of": "2026-08-03T12:00:00Z",
+  "inputs_declared": {
+    "artifact_paths": ["tests/fixtures/valuation-full.json"],
+    "drive_doc_id": "doc-case-test-001",
+    "case_id": "case-test-001"
+  },
+  "new_evidence": [
+    {
+      "label": "二季度财报",
+      "statement": "公司披露二季度收入同比增长 12%，经营现金流覆盖净利润。",
+      "source": {
+        "name": "Example 10-Q",
+        "kind": "sec_filing",
+        "as_of": "2026-08-01T20:00:00Z",
+        "url": "https://example.com/10q"
+      }
+    },
+    {
+      "label": "管理层指引",
+      "statement": "管理层在电话会上维持全年指引区间不变。",
+      "source": {
+        "name": "Example IR call",
+        "kind": "issuer_ir",
+        "as_of": "2026-08-02T01:00:00Z",
+        "url": "https://example.com/ir-call"
+      }
+    }
+  ],
+  "assumption_changes": [
+    "WACC 假设由 10% 下调至 9.5%，反映最新无风险利率变化。"
+  ],
+  "thesis_status": "strengthened",
+  "counter_arguments": [
+    "空头观点认为毛利率已见顶，二季度毛利率环比持平支持该担忧。"
+  ],
+  "open_questions": [
+    "三季度指引是否上调，待下一次财报验证。"
+  ],
+  "confidence": "medium",
+  "plan_revision": {
+    "plan_id": "plan-case-test-001",
+    "base_revision": 2,
+    "change_summary": "二季度财报强化核心论点，入场区间与失效条件维持不变，更新触发证据。",
+    "trigger_evidence": ["二季度财报", "管理层指引"]
+  },
+  "artifact_refs": ["tests/fixtures/valuation-full.json"],
+  "escalation_proposal": "若三季度指引上调，建议升级做 earnings_update 模式的深度研究更新（仅文字建议，不执行）。"
+}

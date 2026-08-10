@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-cleanco",
+    "listing_id": "CLEAN.US",
+    "case_id": "case-underwriting-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "status": "qualified",
+  "symbol": "CLEAN.US",
+  "evidence_id": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "as_of": "2026-07-29T14:30:00Z",
+  "timeframe": "1d",
+  "indicators": {"latest": {"close": 12.2, "atr14": 0.5}},
+  "key_levels": [
+    {"side": "support", "price": 12.0},
+    {"side": "resistance", "price": 15.0}
+  ]
+}

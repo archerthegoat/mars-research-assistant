@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "example-issuer",
+    "listing_id": "TEST.US",
+    "case_id": "case-test-001"
+  },
+  "research_as_of": "2026-08-03T12:00:00Z",
+  "inputs_declared": {
+    "artifact_paths": [],
+    "drive_doc_id": "",
+    "case_id": "case-test-001"
+  },
+  "new_evidence": [],
+  "assumption_changes": [],
+  "thesis_status": "unchanged",
+  "counter_arguments": [],
+  "open_questions": [],
+  "confidence": "low"
+}

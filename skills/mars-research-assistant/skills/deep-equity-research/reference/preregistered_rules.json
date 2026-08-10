@@ -1,0 +1,11 @@
+{
+  "rules_version": "v1.0.3-rules-1",
+  "horizon_months": {"default_min": 1, "default_max": 6},
+  "safety_margin": 0.15,
+  "entry_atr_tolerance": 1.0,
+  "invalidation_atr_multiple": 2.0,
+  "technical_evidence_max_age_days": 5,
+  "min_reward_risk_ratio": 2.0,
+  "gates": ["independent_view", "data_quality", "valuation",
+            "earnings_quality", "technical_evidence"]
+}

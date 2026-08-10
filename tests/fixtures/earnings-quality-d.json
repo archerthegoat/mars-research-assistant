@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-riskco",
+    "listing_id": "RISK.US",
+    "case_id": "case-riskco-2026",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "market_scope": "us",
+  "currency": "USD",
+  "computed_as_of": "2026-07-30T11:00:00Z",
+  "accounting_periods": {
+    "annual": ["FY2023", "FY2024", "FY2025"],
+    "quarters": [
+      "2024Q1", "2024Q2", "2024Q3", "2024Q4",
+      "2025Q1", "2025Q2", "2025Q3", "2025Q4"
+    ]
+  },
+  "components": {
+    "accruals": {
+      "annual": [
+        {"period": "FY2023", "net_income": 200, "operating_cash_flow": -280, "total_assets": 4000},
+        {"period": "FY2024", "net_income": 220, "operating_cash_flow": -430, "total_assets": 4300},
+        {"period": "FY2025", "net_income": 250, "operating_cash_flow": -350, "total_assets": 4600}
+      ],
+      "source": {
+        "name": "RiskCo FY2023-FY2025 10-K",
+        "kind": "sec_filing",
+        "as_of": "2026-03-10T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+      }
+    },
+    "beneish": {
+      "comparable": true,
+      "current_period": "FY2025",
+      "prior_period": "FY2024",
+      "current": {
+        "revenue": 4800,
+        "cogs": 2400,
+        "receivables": 960,
+        "current_assets": 600,
+        "net_ppe": 900,
+        "total_assets": 4600,
+        "depreciation": 80,
+        "sga_expense": 700,
+        "total_liabilities": 2300,
+        "net_income": 250,
+        "operating_cash_flow": -350
+      },
+      "prior": {
+        "revenue": 3000,
+        "cogs": 1350,
+        "receivables": 375,
+        "current_assets": 1200,
+        "net_ppe": 1500,
+        "total_assets": 4300,
+        "depreciation": 100,
+        "sga_expense": 360,
+        "total_liabilities": 1892,
+        "net_income": 220,
+        "operating_cash_flow": -430
+      },
+      "source": {
+        "name": "RiskCo FY2024-FY2025 10-K 财务报表",
+        "kind": "sec_filing",
+        "as_of": "2026-03-10T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+      }
+    },
+    "revenue_recognition": {
+      "metrics": {
+        "receivables_growth": 0.9,
+        "revenue_growth": 0.6,
+        "deferred_revenue_change_pct": -0.25,
+        "related_party_revenue_share": 0.12,
+        "quarter_end_revenue_spike_share": 0.45
+      },
+      "source": {
+        "name": "RiskCo FY2025 10-K 收入确认附注",
+        "kind": "sec_filing",
+        "as_of": "2026-03-10T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+      }
+    },
+    "cash_flow": {
+      "annual": [
+        {"period": "FY2023", "net_income": 200, "operating_cash_flow": -280, "free_cash_flow": -330},
+        {"period": "FY2024", "net_income": 220, "operating_cash_flow": -430, "free_cash_flow": -480},
+        {"period": "FY2025", "net_income": 250, "operating_cash_flow": -350, "free_cash_flow": -400}
+      ],
+      "source": {
+        "name": "RiskCo FY2023-FY2025 10-K 现金流量表",
+        "kind": "sec_filing",
+        "as_of": "2026-03-10T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+      }
+    },
+    "audit_governance": {
+      "audit_opinion": "adverse",
+      "auditor_change": true,
+      "material_weakness": true,
+      "governance_red_flags": [
+        {
+          "id": "cfo_resigned_after_audit_query",
+          "description": "审计问询后 CFO 辞职，继任者未定。",
+          "source": {
+            "name": "RiskCo 8-K：CFO 辞职公告",
+            "kind": "sec_filing",
+            "as_of": "2026-04-02T00:00:00-04:00",
+            "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+          }
+        }
+      ],
+      "source": {
+        "name": "RiskCo FY2025 10-K 审计报告（否定意见）",
+        "kind": "sec_filing",
+        "as_of": "2026-03-10T00:00:00-05:00",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000000004"
+      }
+    }
+  }
+}

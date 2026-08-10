@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-tradeplan",
+    "listing_id": "TP.US",
+    "case_id": "case-tradeplan-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "independent_view": {
+    "present": true,
+    "statement": "市场把该公司定价为低增长成熟企业，但其经常性收入占比与客户留存数据显示增长持续性被低估，这是我们的独立分歧点。"
+  },
+  "preregistered_hypothesis": "未来 1-6 个月内，经常性收入增速与现金流转化将证明市场隐含的低增长预期过于悲观，概率加权公允价值高于当前价格区间。",
+  "falsification_conditions": [
+    "连续两个季度经常性收入同比增速低于 5%",
+    "经营现金流连续两年低于净利润的 50%",
+    "审计意见变为非无保留意见或出现重大内控缺陷"
+  ],
+  "counter_thesis": "反方认为经常性收入增速回落是结构性而非周期性，竞争加剧会持续压缩利润率，估值折价合理。",
+  "premortem": "假设方案失败，最可能的原因是：行业价格竞争超出预期导致利润率下修，同时技术支撑位失效，价值区间与收益风险假设同时恶化。",
+  "base_rate": {
+    "percentile": 0.7,
+    "source": {
+      "name": "历史同类案例基准率研究",
+      "kind": "credible_media",
+      "as_of": "2026-06-30T00:00:00Z",
+      "url": "https://example.com/base-rate-study"
+    },
+    "exceed_reason": "该公司客户留存率与单位经济模型处于历史同类案例的前 30%，存在结构性理由支持超越基准率。",
+    "verification_metrics": [
+      "经常性收入同比增速",
+      "客户留存率",
+      "经营现金流与净利润比率"
+    ]
+  },
+  "cash_question": {
+    "would_deploy": true,
+    "reason": "若今天这是一笔现金，在当前证据与预注册规则下愿意按条件式方案部署，因为价值带与技术支持区存在交集且收益风险比达标。"
+  }
+}

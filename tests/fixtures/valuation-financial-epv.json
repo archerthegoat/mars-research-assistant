@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "example-issuer",
+    "listing_id": "TEST.US",
+    "case_id": "case-test-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "market_scope": "us",
+  "currency": "USD",
+  "computed_as_of": "2026-07-30T12:00:00Z",
+  "models": {
+    "dcf": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：金融类发行人现金流口径不适用三情景 DCF。"
+    },
+    "reverse_dcf": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：无 DCF 基准时反向 DCF 不适用。"
+    },
+    "pvgo": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：金融类发行人不适用 PVGO。"
+    },
+    "epv": {
+      "status": "requested",
+      "normalized_ebit": {"value": 220.0, "source": {"name": "Example assumption", "kind": "valuation_assumption", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/normalized-ebit"}},
+      "tax_rate": {"value": 0.25, "source": {"name": "Example filing", "kind": "regulatory_filing", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/tax"}},
+      "maintenance_capex": {"value": 15.0, "source": {"name": "Example assumption", "kind": "valuation_assumption", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/capex"}},
+      "wacc": {"value": 0.1, "source": {"name": "Example assumption", "kind": "valuation_assumption", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/wacc"}},
+      "net_debt": {"value": 100.0, "source": {"name": "Example filing", "kind": "regulatory_filing", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/debt"}},
+      "shares_outstanding": {"value": 100.0, "source": {"name": "Example filing", "kind": "regulatory_filing", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/shares"}},
+      "price": {"value": 12.2, "source": {"name": "Example public quote", "kind": "public_quote", "as_of": "2026-07-30T00:00:00Z", "url": "https://example.com/quote"}}
+    },
+    "eva": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：投入资本口径不可得，EVA 不适用。"
+    },
+    "sotp": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：单一业务发行人无需 SOTP。"
+    },
+    "monte_carlo": {
+      "status": "not_applicable",
+      "reason": "离线验收示例：无 DCF 基准模型，蒙特卡洛不适用。"
+    }
+  }
+}

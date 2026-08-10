@@ -14,6 +14,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "skills" / "mars-research-assistant"
 PREFIX = "mars-research-assistant"
+DEVELOPMENT_DIR_PARTS = {"tests", "docs", ".git", ".venv", "__pycache__"}
 PERMISSIONS = (
     "public_network_research",
     "on_demand_uv_environment",
@@ -25,7 +26,15 @@ PERMISSIONS = (
 def _included_files() -> list[Path]:
     if not RUNTIME.is_dir():
         raise ValueError("runtime package is missing")
-    files = sorted(path for path in RUNTIME.rglob("*") if path.is_file())
+    files = sorted(
+        path
+        for path in RUNTIME.rglob("*")
+        if path.is_file()
+        and not any(
+            part in DEVELOPMENT_DIR_PARTS
+            for part in path.relative_to(RUNTIME).parts
+        )
+    )
     if any(path.is_symlink() for path in files):
         raise ValueError("runtime package contains a symbolic link")
     return files

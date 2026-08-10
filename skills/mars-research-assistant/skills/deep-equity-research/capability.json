@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "skill": "deep-equity-research",
-  "delivery": "local_markdown_deep_equity_research",
+  "display_name": "深度研究",
+  "delivery": "local_underwriting_package",
   "local_artifact_contract": {
     "directory": "mars-research",
     "format": "markdown",
@@ -15,6 +16,64 @@
     "verified_fields": ["company_name", "ticker", "exchange", "issuer"],
     "exact_match_fields": ["company_name", "ticker", "exchange"]
   },
+  "artifact_identity": {
+    "required_fields": ["issuer_id", "listing_id", "case_id", "artifact_version", "schema_version"],
+    "ah_compare": "one_case_id_two_listing_ids",
+    "bare_ticker_as_primary_key": "forbidden"
+  },
+  "research_modes": ["initial", "earnings_update"],
+  "earnings_update_without_prior_model": "auto_degrade_to_initial",
+  "accounting_baseline": {
+    "annual_years_min": 3,
+    "quarters_min": 8,
+    "shortfall_behavior": "record_baseline_gap_never_fabricate"
+  },
+  "chapters": [
+    "研究范围、预注册命题与交易结论",
+    "公司、业务模式与价值驱动",
+    "行业结构、竞争与行业专属反证",
+    "管理层、治理与资本配置",
+    "财务、分部/KPI 与财报质量",
+    "预期差、催化剂、基准率与跟踪清单",
+    "可复算估值与“现价定价了什么”",
+    "反方论证、事前风险预演与可证伪条件",
+    "来源、数据对账、时间戳、假设与数据缺口"
+  ],
+  "artifacts": {
+    "required": [
+      "underwriting.md",
+      "underwriting-inputs.json",
+      "valuation.json",
+      "technical-evidence.json",
+      "trade-plan.json"
+    ],
+    "optional": ["underwriting.html"],
+    "conditional": {
+      "trade-plan.html": "technical_gate_passed_and_value_technical_intersection"
+    }
+  },
+  "market_scope": {
+    "preference_file": "mars-market-preferences.json",
+    "scopes": ["us", "hk", "a_share", "ah_compare"],
+    "no_default_us": true,
+    "explicit_suffix_priority": true,
+    "bare_code_ambiguity": "ask",
+    "bare_alpha_ticker_resolution": "us_only_when_sole_enabled_base_scope_else_ask",
+    "out_of_scope_options": ["once", "add_to_scope"],
+    "ah_compare_disclosures": [
+      "fx_rate",
+      "share_right_ratio",
+      "liquidity_diff",
+      "trading_day_diff",
+      "premium_discount"
+    ]
+  },
+  "providers": {
+    "adapter": "scripts/providers.py",
+    "explicit_resolution_required": true,
+    "silent_fallback": "forbidden",
+    "ledger_record_required": true
+  },
   "source_hierarchy": {
     "primary": ["sec_filing", "regulatory_filing", "issuer_ir", "exchange"],
     "research_evidence": ["issuer_announcement", "credible_media"],
@@ -22,62 +81,102 @@
     "valuation_assumption": ["valuation_assumption"],
     "forbidden": ["search_summary"]
   },
+  "industry_registry": {
+    "path": "reference/industry_registry.json",
+    "industries": 16,
+    "load": "per_target_industry",
+    "dimensions": [
+      "key_kpis",
+      "history_fields",
+      "forecast_drivers",
+      "valuation_methods",
+      "counter_evidence",
+      "min_data"
+    ]
+  },
+  "valuation_engine": {
+    "script": "scripts/dcf.py",
+    "models": [
+      "dcf",
+      "reverse_dcf",
+      "pvgo",
+      "pe",
+      "epv",
+      "eva",
+      "sotp",
+      "monte_carlo"
+    ],
+    "scenario_probabilities": "explicit_and_sum_to_one",
+    "terminal_value_checks": [
+      "long_run_growth",
+      "mature_margin",
+      "reinvestment_roic_consistency"
+    ],
+    "missing_input_behavior": "record_missing_or_not_applicable_without_numbers",
+    "mental_math": "forbidden"
+  },
+  "earnings_quality": {
+    "script": "scripts/earnings_quality.py",
+    "rules": "reference/earnings_quality_rules.json",
+    "grades": ["A", "B", "C", "D"],
+    "components": [
+      "accruals",
+      "beneish",
+      "revenue_recognition",
+      "cash_flow",
+      "audit_governance"
+    ],
+    "beneish_applicability_gate": true,
+    "provisional_grade_allowed": true,
+    "cd_veto_long_entry": true,
+    "short_recommendation": "never"
+  },
+  "trade_plan": {
+    "script": "scripts/trade_plan.py",
+    "rules": "reference/preregistered_rules.json",
+    "direction": "long_only",
+    "position_agnostic": true,
+    "horizon_months": {"min": 1, "max": 6},
+    "allowed_actions": [
+      "entry_plan",
+      "target_plan",
+      "invalidation_plan",
+      "watch"
+    ],
+    "gates_versioned": true,
+    "no_intersection_behavior": "watch_with_wait_conditions_only"
+  },
+  "technical_evidence": {
+    "consumed_by": "evidence_id",
+    "rewrite": "forbidden",
+    "stale_or_failed_behavior": "no_price_zones_watch_only"
+  },
+  "vie_adr": {
+    "evidence_required_for_discount": true,
+    "flat_discount": "forbidden"
+  },
   "response_fields": [
     "research_as_of",
     "issuer_identity",
+    "artifact_identity",
+    "market_scope",
+    "research_mode",
     "nine_chapter_report",
-    "financial_quality_checks",
+    "earnings_quality_grade",
     "valuation_status",
+    "trade_plan_status",
     "sources_and_timestamps",
     "data_gap",
     "local_artifact"
   ],
-  "chapters": [
-    "研究范围与核心判断",
-    "公司与商业模式",
-    "行业与竞争格局",
-    "管理层、治理与资本配置",
-    "财务表现与质量核查",
-    "预期差、催化剂与关键跟踪项",
-    "三情景 DCF/反向 DCF",
-    "风险、反方论点与可证伪条件",
-    "来源、时间戳、假设与数据缺口"
-  ],
-  "financial_quality_checks": [
-    "revenue_profit_operating_cash_flow_consistency",
-    "cash_conversion_and_accrual_quality",
-    "receivables_and_deferred_revenue_relative_to_revenue",
-    "dilution_sbc_audit_and_governance_red_flags"
-  ],
-  "valuation_input_contract": {
-    "required": [
-      "price",
-      "shares_outstanding",
-      "net_debt",
-      "wacc",
-      "terminal_growth",
-      "bear_base_bull_free_cash_flow_paths"
-    ],
-    "source_traceability_required": true,
-    "missing_input_behavior": "skip_valuation_and_record_data_gap"
-  },
-  "reverse_dcf_input_contract": {
-    "required": ["current_free_cash_flow", "horizon_years"],
-    "source_traceability_required": true,
-    "horizon_years": {
-      "whole_number": true,
-      "minimum": 1,
-      "maximum": 20
-    }
-  },
   "forbidden_effects": [
-    "trade_recommendation",
-    "position_sizing",
-    "technical_analysis",
     "account_access",
     "broker_write",
-    "drive_write",
-    "persistent_state"
+    "trade_execution",
+    "position_sizing",
+    "short_selling",
+    "drive_write_without_confirmation",
+    "silent_provider_fallback"
   ],
   "scenarios": [
     {
@@ -85,12 +184,21 @@
       "expected": {
         "research_as_of": "included",
         "issuer_identity": "verified",
+        "market_scope": "resolved_from_preference_or_explicit_suffix",
+        "research_mode": "initial",
         "nine_chapter_report": "included",
-        "financial_quality_checks": "four_checks_with_sources_or_gaps",
-        "valuation_status": "run_only_when_input_contract_is_met",
-        "sources_and_timestamps": "included",
-        "data_gap": "included",
-        "local_artifact": "markdown_created"
+        "earnings_quality_grade": "A_to_D_with_evidence_or_provisional",
+        "valuation_status": "computed_by_dcf_py_or_explicit_gaps",
+        "trade_plan_status": "entry_plan_or_watch_with_reasons",
+        "local_artifact": "underwriting_package_created"
+      }
+    },
+    {
+      "request": "复盘 0700.HK 最新财报并更新我的研究。",
+      "expected": {
+        "research_mode": "earnings_update",
+        "prior_model_missing": "auto_degrade_to_initial_with_note",
+        "trade_plan_status": "revision_via_drive_writeback_after_confirmation"
       }
     }
   ]

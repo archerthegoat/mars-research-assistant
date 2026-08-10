@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "rules_version": "v1.0.3-eq-1",
+  "description": "财报质量 A-D 分级规则：阈值、权重、红旗清单与适用性门全部在此版本化，供 earnings_quality.py 加载，研究运行期间不得临时改动。所有组件得分均为 0-100（越高越好），按权重加权合计映射 A-D；任一组件 missing 或 not_applicable 时按已计算组件权重归一化合计，并将结果标记为暂定级（provisional）。",
+  "component_weights": {
+    "accruals": 0.25,
+    "beneish": 0.2,
+    "revenue_recognition": 0.2,
+    "cash_flow": 0.2,
+    "audit_governance": 0.15
+  },
+  "grade_boundaries": {
+    "A_min": 85,
+    "B_min": 70,
+    "C_min": 50,
+    "note": "加权总分 [0,100]：>=85 为 A，>=70 为 B，>=50 为 C，其余为 D；C 或 D 触发 long_entry_veto（仅多头否决，不产生其他方向建议）。"
+  },
+  "accruals": {
+    "min_years": 3,
+    "ratio_definition": "年度应计比率 = (net_income - operating_cash_flow) / total_assets；负值表示经营现金流高于净利润，不扣分。",
+    "annual_deductions": [
+      {"above": 0.1, "deduct": 25, "reason": "单年应计比率 > 10%"},
+      {"above": 0.05, "deduct": 10, "reason": "单年应计比率 > 5%"}
+    ],
+    "mean_deductions": [
+      {"above": 0.1, "deduct": 20, "reason": "多年均值应计比率 > 10%"},
+      {"above": 0.05, "deduct": 8, "reason": "多年均值应计比率 > 5%"}
+    ],
+    "note": "每年只触发最高一档扣分；总分下限为 0。"
+  },
+  "beneish": {
+    "m_score_threshold": -1.78,
+    "intercept": -4.84,
+    "coefficients": {
+      "DSRI": 0.92,
+      "GMI": 0.528,
+      "AQI": 0.404,
+      "SGI": 0.892,
+      "DEPI": 0.115,
+      "SGAI": -0.172,
+      "LVGI": -0.327,
+      "TATA": 4.679
+    },
+    "applicability_gate": "需要两年可比的资产负债表+利润表字段全部齐备且 comparable=true；字段缺失、会计口径不可比或关键分母为零时记 not_applicable，不伪造 M-Score。",
+    "required_fields": [
+      "revenue",
+      "cogs",
+      "receivables",
+      "current_assets",
+      "net_ppe",
+      "total_assets",
+      "depreciation",
+      "sga_expense",
+      "total_liabilities",
+      "net_income",
+      "operating_cash_flow"
+    ],
+    "variables": {
+      "DSRI": "应收账款指数 = (receivables_t / revenue_t) / (receivables_t-1 / revenue_t-1)；>1 表示应收相对收入增长，可能提前确认收入。",
+      "GMI": "毛利率指数 = gross_margin_t-1 / gross_margin_t，其中 gross_margin = (revenue - cogs) / revenue；>1 表示毛利率恶化，造假动机上升。",
+      "AQI": "资产质量指数 = [1 - (current_assets + net_ppe) / total_assets]_t / 同期_t-1；>1 表示非流动、非实物资产占比上升，可能有费用资本化。",
+      "SGI": "收入增长指数 = revenue_t / revenue_t-1；高增长公司造假倾向更高。",
+      "DEPI": "折旧指数 = [depreciation / (depreciation + net_ppe)]_t-1 / 同期_t；>1 表示折旧率下降，可能延长资产寿命虚增利润。",
+      "SGAI": "销售管理费用指数 = (sga_expense_t / revenue_t) / (sga_expense_t-1 / revenue_t-1)；>1 表示费用相对收入上升。",
+      "LVGI": "杠杆指数 = (total_liabilities_t / total_assets_t) / (total_liabilities_t-1 / total_assets_t-1)；>1 表示杠杆上升。",
+      "TATA": "总应计占总资产 = (net_income_t - operating_cash_flow_t) / total_assets_t；应计越高，利润质量越差。"
+    },
+    "score_bands": [
+      {"max_m_score": -2.22, "score": 100, "reason": "M-Score <= -2.22，远低于操纵警戒线"},
+      {"max_m_score": -1.78, "score": 70, "reason": "M-Score 处于 -2.22 至 -1.78，接近但未到警戒线"},
+      {"max_m_score": -1.0, "score": 30, "reason": "M-Score > -1.78，超过操纵警戒线"},
+      {"max_m_score": null, "score": 10, "reason": "M-Score > -1.0，高度疑似利润操纵"}
+    ]
+  },
+  "revenue_recognition": {
+    "note": "逐项评估红旗，每触发一项扣分，总分下限 0；输入缺某项指标时该项不评估并写入 data_gaps，不视为未触发。",
+    "red_flags": [
+      {
+        "id": "receivables_growth_exceeds_revenue_growth",
+        "kind": "difference_above",
+        "metrics": ["receivables_growth", "revenue_growth"],
+        "threshold": 0.1,
+        "deduct": 20,
+        "description": "应收账款增速 - 收入增速 > 10 个百分点：收入可能靠放松信用或提前确认堆出。"
+      },
+      {
+        "id": "deferred_revenue_decline",
+        "kind": "below",
+        "metrics": ["deferred_revenue_change_pct"],
+        "threshold": -0.1,
+        "deduct": 15,
+        "description": "递延收入同比下降超过 10%：未来已收款收入储备流失，可能透支收入确认。"
+      },
+      {
+        "id": "related_party_revenue_share",
+        "kind": "above",
+        "metrics": ["related_party_revenue_share"],
+        "threshold": 0.05,
+        "deduct": 20,
+        "description": "关联方收入占比 > 5%：收入独立性存疑。"
+      },
+      {
+        "id": "quarter_end_revenue_spike",
+        "kind": "above",
+        "metrics": ["quarter_end_revenue_spike_share"],
+        "threshold": 0.3,
+        "deduct": 15,
+        "description": "期末突击收入占当季收入 > 30%：存在期末冲量确认迹象。"
+      }
+    ]
+  },
+  "cash_flow": {
+    "min_years": 3,
+    "ocf_ni_definition": "最近年度 operating_cash_flow / net_income；net_income <= 0 时按最低档计分并记录说明。",
+    "ocf_ni_bands": [
+      {"min_ratio": 1.0, "score": 100, "reason": "OCF/NI >= 1，利润有现金流支撑"},
+      {"min_ratio": 0.8, "score": 80, "reason": "OCF/NI 0.8-1.0，现金转换尚可"},
+      {"min_ratio": 0.5, "score": 50, "reason": "OCF/NI 0.5-0.8，现金转换偏弱"},
+      {"min_ratio": null, "score": 20, "reason": "OCF/NI < 0.5 或净利润非正，利润缺乏现金流支撑"}
+    ],
+    "ocf_ni_weight": 0.6,
+    "fcf_persistence_weight": 0.4,
+    "fcf_persistence_definition": "自由现金流为正的年度占比；组件得分 = 0.6 * OCF/NI 档得分 + 0.4 * 100 * FCF 为正占比。"
+  },
+  "audit_governance": {
+    "opinion_scores": {
+      "unqualified": 100,
+      "unqualified_with_emphasis": 85,
+      "qualified": 30,
+      "adverse": 0,
+      "disclaimer": 0
+    },
+    "opinion_severity": {
+      "unqualified": "none",
+      "unqualified_with_emphasis": "low",
+      "qualified": "high",
+      "adverse": "critical",
+      "disclaimer": "critical"
+    },
+    "deductions": {
+      "auditor_change": 15,
+      "material_weakness": 30,
+      "governance_red_flag_each": 10
+    },
+    "signal_severity": {
+      "auditor_change": "medium",
+      "material_weakness": "high",
+      "governance_red_flag": "medium"
+    },
+    "note": "得分 = 审计意见基础分 - 各项扣分，下限 0；非标意见（qualified/adverse/disclaimer）属于关键否决信号。"
+  }
+}

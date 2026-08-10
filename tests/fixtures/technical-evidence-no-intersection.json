@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "identity": {
+    "issuer_id": "issuer-tradeplan",
+    "listing_id": "TP.US",
+    "case_id": "case-tradeplan-001",
+    "artifact_version": 1,
+    "schema_version": 1
+  },
+  "status": "qualified",
+  "symbol": "TP.US",
+  "evidence_id": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "as_of": "2026-07-29T14:30:00Z",
+  "timeframe": "1d",
+  "ohlcv": [
+    {"timestamp": "2026-07-16", "open": 5.1, "high": 5.3, "low": 5.0, "close": 5.2, "volume": 900000},
+    {"timestamp": "2026-07-17", "open": 5.2, "high": 5.4, "low": 5.1, "close": 5.3, "volume": 950000},
+    {"timestamp": "2026-07-20", "open": 5.3, "high": 5.4, "low": 5.0, "close": 5.1, "volume": 1000000},
+    {"timestamp": "2026-07-21", "open": 5.1, "high": 5.3, "low": 5.0, "close": 5.2, "volume": 920000},
+    {"timestamp": "2026-07-22", "open": 5.2, "high": 5.5, "low": 5.1, "close": 5.4, "volume": 1100000},
+    {"timestamp": "2026-07-23", "open": 5.4, "high": 5.5, "low": 5.2, "close": 5.3, "volume": 980000},
+    {"timestamp": "2026-07-24", "open": 5.3, "high": 5.4, "low": 5.1, "close": 5.2, "volume": 940000},
+    {"timestamp": "2026-07-27", "open": 5.2, "high": 5.3, "low": 5.0, "close": 5.1, "volume": 910000},
+    {"timestamp": "2026-07-28", "open": 5.1, "high": 5.4, "low": 5.0, "close": 5.3, "volume": 1050000},
+    {"timestamp": "2026-07-29", "open": 5.3, "high": 5.4, "low": 5.1, "close": 5.2, "volume": 990000}
+  ],
+  "indicators": {
+    "latest": {
+      "close": 5.2,
+      "atr14": 0.5
+    }
+  },
+  "key_levels": [
+    {"side": "support", "price": 5.0, "kind": "swing_cluster"},
+    {"side": "resistance", "price": 6.0, "kind": "swing_cluster"}
+  ]
+}

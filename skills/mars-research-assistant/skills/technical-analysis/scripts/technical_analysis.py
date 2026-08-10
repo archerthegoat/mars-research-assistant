@@ -103,6 +103,25 @@ def _timestamp(value: object, context: str) -> datetime:
     return parsed
 
 
+def _identity(value: object) -> dict[str, Any] | None:
+    """Optional case identity carried from the fixture into the evidence
+    payload so downstream artifacts can bind the evidence to a case."""
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise TechnicalAnalysisError("identity requires an object")
+    record: dict[str, Any] = {
+        field: _required_text(value.get(field), f"identity {field}")
+        for field in ("issuer_id", "listing_id", "case_id")
+    }
+    for field in ("artifact_version", "schema_version"):
+        number = value.get(field)
+        if isinstance(number, bool) or not isinstance(number, int) or number != 1:
+            raise TechnicalAnalysisError(f"identity {field} must be 1")
+        record[field] = number
+    return record
+
+
 def _source(value: object) -> Source:
     if not isinstance(value, dict):
         raise TechnicalAnalysisError("provider requires an object")
@@ -140,6 +159,8 @@ def _normalize_bar(value: object) -> dict[str, int | float | str]:
     volume = _number(value.get("volume"), "volume")
     if volume <= 0:
         raise DataQualityError("OHLCV bar requires positive volume")
+    if min(open_price, high_price, low_price, close_price) <= 0:
+        raise DataQualityError("OHLCV bar requires positive prices")
     if not low_price <= min(open_price, close_price) <= max(
         open_price, close_price
     ) <= high_price:
@@ -595,6 +616,7 @@ def _build_evidence(
     source: Source,
     history: QualifiedHistory,
     retry_count: int,
+    identity: dict[str, Any] | None,
 ) -> dict[str, Any]:
     bars = history.bars
     closes = [float(bar["close"]) for bar in bars]
@@ -675,6 +697,8 @@ def _build_evidence(
             history.timezone,
         ),
     }
+    if identity is not None:
+        evidence["identity"] = identity
     technical_identity = {
         key: value for key, value in evidence.items() if key != "market_context"
     }
@@ -1058,8 +1082,23 @@ def render_fixture(
     symbol = _required_text(fixture.get("instrument"), "fixture")
     timeframe = _required_text(fixture.get("timeframe"), "fixture")
     research_as_of = _required_text(fixture.get("research_as_of"), "fixture")
-    _timestamp(research_as_of, "research as_of")
+    research_moment = _timestamp(research_as_of, "research as_of")
+    identity = _identity(fixture.get("identity"))
+    listing_id = identity.get("listing_id") if identity is not None else None
+    bare_us_alias = (
+        isinstance(listing_id, str)
+        and "." not in symbol
+        and listing_id == f"{symbol}.US"
+    )
+    if identity is not None and listing_id != symbol and not bare_us_alias:
+        raise TechnicalAnalysisError(
+            "identity listing_id must match fixture instrument"
+        )
     source = _source(fixture.get("provider"))
+    if _timestamp(source.as_of, "provider as_of") > research_moment:
+        raise TechnicalAnalysisError(
+            "provider as_of must not be after research_as_of"
+        )
     if source.status != "available":
         source_attempts, _ = _source_attempt_metadata(fixture, 1)
         source_error = fixture.get("source_error")
@@ -1119,7 +1158,7 @@ def render_fixture(
         }
 
     try:
-        evidence = _build_evidence(fixture, source, history, retry_count)
+        evidence = _build_evidence(fixture, source, history, retry_count, identity)
     except DataQualityError as error:
         source_attempts, _ = _source_attempt_metadata(
             fixture, retry_count + 1
