@@ -63,9 +63,9 @@ class MarsUnderwritingSkillTests(unittest.TestCase):
     ) -> subprocess.CompletedProcess[str]:
         if renderer == UNDERWRITING_RENDERER:
             # The renderer resolves portable evidence paths next to its input.
-            # Stage both input and its referenced artifact so tests that mutate
-            # a fixture in a temporary directory exercise the same contract as
-            # a real case bundle without writing into tests/fixtures.
+            # Stage exactly the artifact named by technical_evidence_ref —
+            # no fallback, no as_of rewrite — so a missing reference or a
+            # timestamp drift fails the test instead of being patched over.
             with tempfile.TemporaryDirectory(prefix="mars-underwriting-input-") as staging:
                 staging_path = Path(staging)
                 staged_fixture = json.loads(fixture.read_text(encoding="utf-8"))
@@ -74,20 +74,23 @@ class MarsUnderwritingSkillTests(unittest.TestCase):
                     json.dumps(staged_fixture, ensure_ascii=False), encoding="utf-8"
                 )
                 evidence_ref = staged_fixture.get("technical_evidence_ref")
-                evidence_name = "technical-evidence.json"
+                evidence_rel = "technical-evidence.json"
                 if isinstance(evidence_ref, dict) and isinstance(
                     evidence_ref.get("artifact_path"), str
                 ):
-                    evidence_name = Path(evidence_ref["artifact_path"]).name
-                source_evidence = fixture.parent / evidence_name
-                if not source_evidence.is_file():
-                    source_evidence = ROOT / "tests" / "fixtures" / "technical-evidence.json"
-                evidence = json.loads(source_evidence.read_text(encoding="utf-8"))
-                if isinstance(evidence_ref, dict) and isinstance(evidence_ref.get("as_of"), str):
-                    evidence["as_of"] = evidence_ref["as_of"]
-                (staging_path / evidence_name).write_text(
-                    json.dumps(evidence, ensure_ascii=False), encoding="utf-8"
+                    evidence_rel = evidence_ref["artifact_path"]
+                candidate = Path(evidence_rel)
+                portable = (
+                    not candidate.is_absolute()
+                    and "\\" not in evidence_rel
+                    and ":" not in evidence_rel
+                    and ".." not in candidate.parts
                 )
+                source_evidence = UNDERWRITING_FIXTURE.parent / candidate
+                if portable and source_evidence.is_file():
+                    target = staging_path / candidate
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(source_evidence.read_bytes())
                 return subprocess.run(
                     [sys.executable, str(renderer), "--input", str(staged_input), "--output", str(output)],
                     cwd=ROOT,
@@ -151,6 +154,25 @@ class MarsUnderwritingSkillTests(unittest.TestCase):
                     )
                 )
                 self.assertEqual(capability.get("local_artifact_contract"), expected)
+
+    def test_drive_writeback_exposes_only_workbench_operations(self) -> None:
+        capability = json.loads(
+            (RUNTIME / "skills" / "drive-writeback" / "capability.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            capability["supported_operations"],
+            ["initialize_workbench", "workbench_write"],
+        )
+        payload = json.dumps(capability, ensure_ascii=False)
+        for retired in ("archive_completed_research", "archive_contract", "archive_routes"):
+            self.assertNotIn(retired, payload)
+        skill_text = (RUNTIME / "skills" / "drive-writeback" / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("归档", skill_text)
+        self.assertIn("投研工作台", skill_text)
 
     def test_equity_snapshot_renders_required_data_and_recent_updates(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mars-test-") as temporary:
@@ -225,6 +247,40 @@ class MarsUnderwritingSkillTests(unittest.TestCase):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn(expected_error, result.stderr)
                     self.assertFalse(output.exists())
+
+    def test_instrument_research_fixtures_follow_the_current_contract(self) -> None:
+        # 代表性快览 fixture 直接走当前渲染合同（全时区 as_of、身份核验、
+        # 三项关键数据、30 天动态窗口），防止 fixture 再次漂移。
+        fixtures = ROOT / "tests" / "fixtures"
+        with tempfile.TemporaryDirectory(prefix="mars-test-") as temporary:
+            temporary_path = Path(temporary)
+            for name, marker in (
+                ("instrument-research-primary.json", "# 个股快览：NVDA"),
+                ("instrument-research-non-us.json", "# 个股快览：7203.T"),
+            ):
+                with self.subTest(fixture=name):
+                    output = temporary_path / f"{name}.md"
+                    result = self._render(SNAPSHOT_RENDERER, fixtures / name, output)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    rendered = output.read_text(encoding="utf-8")
+                    for section in (
+                        marker,
+                        "## 发行人身份",
+                        "## 关键公开数据",
+                        "## 最近 30 天公司相关公告或新闻",
+                        "## 数据缺口",
+                    ):
+                        self.assertIn(section, rendered)
+            with self.subTest(fixture="instrument-research-evidence-gap.json"):
+                blocked_output = temporary_path / "evidence-gap.md"
+                blocked = self._render(
+                    SNAPSHOT_RENDERER,
+                    fixtures / "instrument-research-evidence-gap.json",
+                    blocked_output,
+                )
+                self.assertNotEqual(blocked.returncode, 0)
+                self.assertIn("not uniquely verified", blocked.stderr)
+                self.assertFalse(blocked_output.exists())
 
     def test_equity_renderers_refuse_skill_runtime_output_paths(self) -> None:
         cases = (

@@ -1107,7 +1107,7 @@
   "technical_evidence_ref": {
     "evidence_id": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
     "as_of": "2026-07-20T14:30:00Z",
-    "artifact_path": "technical-evidence.json",
+    "artifact_path": "technical-evidence-watch.json",
     "identity": {
       "issuer_id": "issuer-cleanco",
       "listing_id": "CLEAN.US",

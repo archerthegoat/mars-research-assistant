@@ -10,8 +10,9 @@ market scope per the v1.0.3 implementation contract section 2:
 - a bare alphabetic ticker — any single 1-5 letter token, case-insensitive
   (e.g. ``lite``/``LITE``) — is always classified as a ticker candidate,
   never as a mode name; it resolves to ``us`` only when ``us`` is the sole
-  enabled base scope (``--once-scope us`` counts as enabling us); with
-  multiple enabled base scopes it yields ``ambiguous`` with
+  enabled base scope (``--once-scope us`` counts as enabling us); whenever
+  ``us`` is not the sole enabled base scope — hk only, a_share only,
+  hk+a_share, or any multi-scope combination — it yields ``ambiguous`` with
   ``needs_user_selection`` and ``query_kind: ticker``, asking only for a
   market/exchange selection and never for a company name first; it is never
   guessed locally;
@@ -363,7 +364,10 @@ def _cmd_resolve(
 
     if classified["reason"] == "bare_alpha_ticker":
         base_scopes = {scope for scope in effective_enabled if scope in BASE_SCOPES}
-        if "us" in base_scopes and base_scopes != {"us"}:
+        if base_scopes != {"us"}:
+            # 裸字母 ticker 只有在美股是唯一已启用基础范围时才解析为美股；
+            # 仅港股、仅 A 股、港股+A 股或任何多基础范围情形都必须询问，
+            # 绝不退回 out_of_scope/us。
             _print_json(
                 {
                     "status": "ambiguous",
@@ -375,7 +379,7 @@ def _cmd_resolve(
                         {"market_scope": scope}
                         for scope in _canonical_order(list(effective_enabled))
                     ],
-                    "detail": "已识别为 ticker 候选，但在多个已启用市场范围下不做本地猜测，需要用户选择市场/交易所（可使用交易所后缀，如 AAPL.US）；不要求先提供公司名。",
+                    "detail": "已识别为 ticker 候选，但美股不是唯一已启用基础市场范围，不做本地猜测，需要用户选择市场/交易所（可使用交易所后缀，如 AAPL.US）；不要求先提供公司名。",
                 }
             )
             return 0

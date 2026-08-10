@@ -20,6 +20,7 @@ ALLOWED_VALUATION_METHODS = {
     "dcf",
     "reverse_dcf",
     "pvgo",
+    "pe",
     "epv",
     "eva",
     "sotp",

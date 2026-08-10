@@ -29,7 +29,7 @@
         "资本开支周期",
         "产品均价（ASP）趋势"
       ],
-      "valuation_methods": ["dcf", "reverse_dcf", "pvgo", "epv", "monte_carlo"],
+      "valuation_methods": ["dcf", "reverse_dcf", "pvgo", "pe", "epv", "monte_carlo"],
       "counter_evidence": [
         "库存周转天数连续上升且订单出货比低于 1",
         "资本开支大幅扩张但产能利用率下滑",

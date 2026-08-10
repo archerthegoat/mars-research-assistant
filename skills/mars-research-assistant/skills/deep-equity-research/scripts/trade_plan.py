@@ -412,12 +412,13 @@ def _resolve_value_source(
     valuation: dict[str, Any], safety_margin: float
 ) -> dict[str, Any] | None:
     """Resolve the value band deterministically: a driver-based DCF whose
-    generic quality gate is usable takes precedence; when a driver model was
-    attempted but fails the gate no fundamental target is formed (the legacy
-    baseline DCF must not be dressed up as a target). Without any driver
-    model the legacy behavior is unchanged: a computed DCF value zone first,
-    otherwise the first computed point estimate among EPV, EVA, SOTP anchored
-    into an explicit band. Returns None when no model applies."""
+    generic quality gate is usable takes precedence. An explicitly supplied,
+    usable P/E model is the next alternative; a driver DCF or P/E model that
+    fails its quality gate blocks fallback to the legacy baseline DCF. Without
+    either explicit quality-gated model the legacy behavior is unchanged: a
+    computed DCF value zone first, otherwise the first computed point estimate
+    among EPV, EVA, SOTP anchored into an explicit band. Returns None when no
+    model applies."""
     results = valuation.get("results")
     if not isinstance(results, dict):
         return None
@@ -447,6 +448,33 @@ def _resolve_value_source(
                         "entry_basis": ENTRY_BASIS,
                         "band_note": None,
                     }
+    pe = results.get("pe")
+    if isinstance(pe, dict):
+        quality = pe.get("quality")
+        quality_status = quality.get("status") if isinstance(quality, dict) else None
+        if pe.get("status") == "computed" and quality_status == "usable":
+            zone = pe.get("value_zone")
+            low = _number_or_none(zone.get("low")) if isinstance(zone, dict) else None
+            high = _number_or_none(zone.get("high")) if isinstance(zone, dict) else None
+            weighted = _number_or_none(pe.get("probability_weighted_per_share"))
+            if (
+                low is not None
+                and high is not None
+                and 0 < low <= high
+                and weighted is not None
+                and weighted > 0
+            ):
+                return {
+                    "model": "pe",
+                    "zone_low": low,
+                    "zone_high": high,
+                    "target": weighted,
+                    "target_basis": "pe",
+                    "entry_basis": ENTRY_BASIS,
+                    "band_note": None,
+                }
+        return None
+    if isinstance(driver, dict):
         return None
     dcf = results.get("dcf")
     if isinstance(dcf, dict) and dcf.get("status") == "computed":
@@ -798,7 +826,7 @@ def build_plan(
         record(
             "valuation",
             False,
-            "估值无任何已计算的适用模型（dcf/epv/eva/sotp）给出有效价值，"
+            "估值无任何已计算且通过质量门槛的适用模型（driver_dcf/pe/dcf/epv/eva/sotp）给出有效价值，"
             "无法构成价值带。",
         )
     elif value_source["model"] == "dcf":
@@ -808,6 +836,12 @@ def build_plan(
             "valuation",
             True,
             "驱动型 DCF 质量门槛为 usable，价值区间有效。",
+        )
+    elif value_source["model"] == "pe":
+        record(
+            "valuation",
+            True,
+            "PE 模型使用显式前瞻/正常化 EPS 与情景倍数，质量门槛为 usable，价值区间有效。",
         )
     else:
         record(
@@ -962,7 +996,7 @@ def build_plan(
     watch_conditions: dict[str, list[str]] = {
         "independent_view": ["形成并记录独立观点且现金问题回答为肯定后重估。"],
         "data_quality": ["补齐反方论证、事前预演与基准率材料后重估。"],
-        "valuation": ["完成任一适用估值模型（dcf/epv/eva/sotp）的可复算计算并给出有效价值后重估。"],
+        "valuation": ["完成任一适用估值模型（driver_dcf/pe/dcf/epv/eva/sotp）的可复算计算并通过质量门槛后重估。"],
         "earnings_quality": ["财报质量等级回到 B 及以上（未触发否决）后重估。"],
         "technical_evidence": ["更新技术证据（质量门合格且 as_of 在有效期内）后重估。"],
         "value_technical_intersection": [
@@ -1051,7 +1085,7 @@ def build_plan(
     data_gaps: list[str] = []
     if value_source is None:
         data_gaps.append(
-            "估值缺少任何已计算的适用模型（dcf/epv/eva/sotp），价值带不可用。"
+            "估值缺少任何已计算且通过质量门槛的适用模型（driver_dcf/pe/dcf/epv/eva/sotp），价值带不可用。"
         )
     elif value_source["band_note"]:
         data_gaps.append(value_source["band_note"])

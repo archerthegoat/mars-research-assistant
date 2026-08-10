@@ -8,42 +8,19 @@
     "unique_name_required": true,
     "overwrite": "forbidden"
   },
-  "completed_research_required": false,
   "explicit_confirmation_required": true,
   "supported_operations": [
-    "archive_completed_research",
-    "initialize_research_center",
+    "initialize_workbench",
     "workbench_write"
   ],
-  "archive_contract": {
-    "completed_research_required": true,
-    "explicit_confirmation_required": true
-  },
   "initialization_contract": {
-    "root_name": "交易研究中心",
+    "root_name": "投研工作台",
     "root_scope": "my_drive",
     "root_mime_type": "application/vnd.google-apps.folder",
-    "index_name": "总索引",
-    "index_mime_type": "application/vnd.google-apps.document",
-    "directories": [
-      "收件箱",
-      "每日市场思考",
-      "交易计划",
-      "专题研究",
-      "周度复盘",
-      "案例复盘"
-    ],
-    "indexed_categories": [
-      "交易计划",
-      "专题研究",
-      "周度复盘",
-      "案例复盘"
-    ],
     "idempotent": true,
     "stateless_drive_id_resolution": true,
     "exact_name_and_parent_resolution": true,
     "duplicate_roots_require_user_selection": true,
-    "initialization_confirmation_separate_from_archive": true,
     "readback_verification_required": true,
     "readback_fields": [
       "id",
@@ -63,14 +40,12 @@
       "rename",
       "delete"
     ],
-    "history_backfill": false,
-    "precreate_research_documents": false
+    "precreate_case_documents": false
   },
   "response_fields": [
-    "research_status",
-    "proposed_destination",
-    "proposed_operation",
-    "index_update",
+    "proposal_id",
+    "proposed_target",
+    "base_revision",
     "confirmation_status",
     "write_result",
     "local_artifact"
@@ -82,94 +57,36 @@
     "broker_write",
     "trade_execution"
   ],
-  "archive_routes": {
-    "inbox": {
-      "label": "收件箱",
-      "destination_template": "收件箱 / {title}",
-      "operation": "create",
-      "index_update": false,
-      "simulated_result": "已模拟创建"
-    },
-    "daily_market_thought": {
-      "label": "每日市场思考",
-      "destination_template": "每日市场思考 / {date}",
-      "operation": "更新目标文档中本次写入拥有的内容区段",
-      "index_update": false,
-      "simulated_result": "已模拟更新"
-    },
-    "trade_plan": {
-      "label": "交易计划",
-      "destination_template": "交易计划 / {period}",
-      "operation": "更新目标文档中本次写入拥有的内容区段",
-      "index_update": true,
-      "simulated_result": "已模拟更新"
-    },
-    "topic_research": {
-      "label": "专题研究",
-      "destination_template": "专题研究 / {title}",
-      "operation": "创建新的专题研究文档",
-      "index_update": true,
-      "simulated_result": "已模拟创建"
-    },
-    "weekly_review": {
-      "label": "周度复盘",
-      "destination_template": "周度复盘 / {period}",
-      "operation": "更新目标文档中本次写入拥有的内容区段",
-      "index_update": true,
-      "simulated_result": "已模拟更新"
-    },
-    "case_review": {
-      "label": "案例复盘",
-      "destination_template": "案例复盘 / {title}",
-      "operation": "创建新的案例复盘文档",
-      "index_update": true,
-      "simulated_result": "已模拟创建"
-    }
-  },
-  "required_contract": {
-    "delivery": "drive_writeback_with_local_receipt",
-    "completed_research_required": false,
-    "explicit_confirmation_required": true,
-    "supported_operations": [
-      "archive_completed_research",
-      "initialize_research_center",
-      "workbench_write"
-    ]
-  },
   "scenarios": [
     {
-      "request": "将已完成的每日市场思考写入交易研究中心。",
+      "request": "初始化我的投研工作台。",
       "expected": {
-        "research_status": "completed",
-        "proposed_destination": "included",
-        "proposed_operation": "included",
-        "index_update": "not_updated",
+        "proposal_id": "included",
+        "proposed_target": "included",
         "confirmation_status": "pending",
         "write_result": "not_executed",
         "local_artifact": "markdown_created"
       }
     },
     {
-      "request": "确认将该专题研究写入已提议的交易研究中心位置。",
+      "request": "把这个交易想法写入该案例的工作台主文档。",
       "expected": {
-        "research_status": "completed",
-        "proposed_destination": "included",
-        "proposed_operation": "included",
-        "index_update": "simulated_updated",
-        "confirmation_status": "confirmed",
-        "write_result": "simulated_created",
+        "proposal_id": "included",
+        "proposed_target": "idea_log",
+        "base_revision": "included",
+        "confirmation_status": "pending",
+        "write_result": "not_executed",
         "local_artifact": "markdown_created"
       }
     },
     {
-      "request": "在目录初始化完成后，第二次确认归档该专题研究。",
+      "request": "确认将已确定方案的新 revision 写入工作台。",
       "expected": {
-        "research_status": "completed",
-        "proposed_destination": "included",
-        "proposed_operation": "included",
-        "index_update": "updated",
+        "proposal_id": "echoed",
+        "proposed_target": "current_plan",
+        "base_revision": "rechecked",
         "confirmation_status": "confirmed",
-        "write_result": "created_and_verified",
+        "write_result": "written_and_verified",
         "local_artifact": "markdown_created"
       }
     }
@@ -186,8 +103,10 @@
     "conflict": "explicit_user_choice_keep_merge_or_new_plan",
     "outbox": "visible_local_pending_sync_recheck_parent_revision",
     "full_research_copy_to_drive": "forbidden",
+    "full_research_reference": "artifact_id_or_link_only",
     "local_simulation_script": "scripts/drive_workbench.py",
     "real_drive_write_requires_explicit_confirmation": true,
+    "initialization_confirmation_separate_from_write": true,
     "user_sections_preserved": true
   }
 }

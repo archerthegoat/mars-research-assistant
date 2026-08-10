@@ -55,6 +55,7 @@ CORE_BASELINE_LABELS = {"revenue": "收入", "net_income": "净利润", "operati
 FUNDAMENTAL_TARGET_LABELS = {
     "probability_weighted": "概率加权公允价值",
     "driver_dcf": "驱动型 DCF 概率加权每股价值",
+    "pe": "PE 概率加权每股参考价值",
     "epv": "EPV 每股公允价值",
     "eva": "剩余收益（EVA）每股公允价值",
     "sotp": "SOTP 分部加总每股公允价值",
@@ -430,6 +431,7 @@ def _model_status_line(name: str, result: object) -> str:
         metrics = {
             "dcf": ("概率加权每股公允价值", result.get("probability_weighted_per_share"), _fmt),
             "driver_dcf": ("驱动型 DCF 概率加权每股", result.get("probability_weighted_per_share"), _fmt),
+            "pe": ("PE 概率加权每股", result.get("probability_weighted_per_share"), _fmt),
             "reverse_dcf": ("现价隐含 FCF 年化增长", result.get("implied_fcf_cagr"), _pct),
             "pvgo": ("PVGO 占现价比例", result.get("pvgo_share_of_price"), _pct),
             "epv": ("EPV 每股", result.get("epv_per_share"), _fmt),
@@ -786,6 +788,108 @@ def _driver_dcf_lines(driver: dict[str, Any], currency: str) -> list[str]:
     return lines
 
 
+def _pe_quality_status(pe: object) -> str | None:
+    """Read the PE quality gate; computed PE must carry an explicit gate."""
+    if not isinstance(pe, dict):
+        return None
+    quality = pe.get("quality")
+    if not isinstance(quality, dict):
+        if pe.get("status") == "computed":
+            raise UnderwritingError("computed pe requires a quality object")
+        return None
+    status = _text(quality.get("status"), "pe quality")
+    if status not in DRIVER_QUALITY_STATUSES:
+        raise UnderwritingError(f"pe quality status is not supported: {status}")
+    return status
+
+
+def _pe_lines(pe: dict[str, Any], currency: str) -> list[str]:
+    """Render an explicit scenario P/E model without implying certainty."""
+    quality_status = _pe_quality_status(pe)
+    basis = pe.get("earnings_basis")
+    basis_text = _text(basis, "pe earnings_basis") if basis is not None else "未获取到"
+    basis_rationale = pe.get("basis_rationale")
+    rationale_text = (
+        _statement(basis_rationale, "pe basis rationale")
+        if basis_rationale is not None
+        else "未获取到"
+    )
+    lines = [
+        "### P/E 估值（EPS × P/E 倍数）",
+        f"- 盈利口径：{basis_text}；口径说明：{rationale_text}。",
+    ]
+    quality = pe.get("quality") if isinstance(pe.get("quality"), dict) else {}
+    reasons = quality.get("reasons", [])
+    if quality_status is not None:
+        reason_text = (
+            "；".join(_statement(item, "pe quality reason") for item in reasons)
+            if isinstance(reasons, list) and reasons
+            else "未记录原因"
+        )
+        lines.append(f"- 质量门槛：**{quality_status}**——{reason_text}。")
+    status = _text(pe.get("status"), "pe status")
+    if status != "computed":
+        missing = pe.get("missing")
+        if isinstance(missing, list) and missing:
+            lines.append(
+                f"- 状态：{status}；缺少输入："
+                + ", ".join(_text(item, "pe missing") for item in missing)
+                + "；不输出参考值。"
+            )
+        else:
+            lines.append(f"- 状态：{status}。")
+        lines.append("")
+        return lines
+    lines.extend([
+        "| 情景 | 概率 | EPS | P/E 倍数 | 每股参考值 |",
+        "| --- | ---: | ---: | ---: | ---: |",
+    ])
+    scenarios = pe.get("scenarios")
+    if not isinstance(scenarios, list) or not scenarios:
+        raise UnderwritingError("computed pe requires scenarios")
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            raise UnderwritingError("pe scenario must be an object")
+        lines.append(
+            f"| {_text(scenario.get('name'), 'pe scenario')} "
+            f"| {_pct(scenario.get('probability'), 'pe probability')} "
+            f"| {_fmt(scenario.get('eps'), 'pe eps')} "
+            f"| {_fmt(scenario.get('pe_multiple'), 'pe multiple')}x "
+            f"| {_fmt(scenario.get('per_share'), 'pe per_share')} {currency} |"
+        )
+    weighted = _number(
+        pe.get("probability_weighted_per_share"), "pe weighted per_share"
+    )
+    zone = pe.get("value_zone")
+    zone_text = (
+        f"{_fmt(zone.get('low'), 'pe zone low')} – "
+        f"{_fmt(zone.get('high'), 'pe zone high')} {currency}"
+        if isinstance(zone, dict)
+        else "未计算"
+    )
+    lines.append("")
+    if quality_status == "usable":
+        lines.append(
+            f"PE 参考值（可作为基本面目标候选）：**{_fmt(weighted)} {currency}**；"
+            f"参考区间：{zone_text}。"
+        )
+    elif quality_status == "conditional":
+        lines.append(
+            f"条件性 PE 输出：{_fmt(weighted)} {currency}（参考区间 {zone_text}）；"
+            "质量门槛为 conditional，未形成基本面目标。"
+        )
+    else:
+        lines.append(
+            "估值模型待重建：PE 质量门槛为 unreliable，以上数值仅为留档输出。"
+        )
+    if pe.get("current_pe") is not None:
+        lines.append(
+            f"- 当前价格对应的加权 P/E：{_fmt(pe.get('current_pe'), 'pe current_pe')}x。"
+        )
+    lines.append("")
+    return lines
+
+
 def _valuation_lines(valuation: dict[str, Any], currency: str) -> list[str]:
     results = valuation.get("results")
     if not isinstance(results, dict):
@@ -804,7 +908,10 @@ def _valuation_lines(valuation: dict[str, Any], currency: str) -> list[str]:
     model_names = ["dcf"]
     if "driver_dcf" in results:
         model_names.append("driver_dcf")
-    model_names.extend(["reverse_dcf", "pvgo", "epv", "eva", "sotp", "monte_carlo"])
+    model_names.extend(["reverse_dcf", "pvgo"])
+    if "pe" in results:
+        model_names.append("pe")
+    model_names.extend(["epv", "eva", "sotp", "monte_carlo"])
     for name in model_names:
         lines.append(_model_status_line(name, results.get(name)))
     lines.append("")
@@ -866,12 +973,16 @@ def _valuation_lines(valuation: dict[str, Any], currency: str) -> list[str]:
         lines.append("")
     if isinstance(driver, dict):
         lines.extend(_driver_dcf_lines(driver, currency))
+    pe = results.get("pe")
+    if isinstance(pe, dict):
+        lines.extend(_pe_lines(pe, currency))
     # DCF 关键输入节无论 dcf 状态（computed/missing_inputs/no_solution 等）
     # 都出现；无 inputs_provenance 时逐项“未获取到”。
     if isinstance(dcf, dict):
         lines.extend(_dcf_inputs_lines(dcf, currency))
     reverse = results.get("reverse_dcf")
     pvgo = results.get("pvgo")
+    pe = results.get("pe")
     priced_in: list[str] = ["### 现价定价了什么"]
     if driver_usable:
         priced_in.append(
@@ -899,6 +1010,19 @@ def _valuation_lines(valuation: dict[str, Any], currency: str) -> list[str]:
         )
     else:
         priced_in.append("- PVGO 分解：见模型结果总览中的状态与原因。")
+    if isinstance(pe, dict) and pe.get("status") == "computed":
+        pe_quality = _pe_quality_status(pe)
+        if pe_quality == "usable":
+            priced_in.append(
+                f"- PE 参考值：概率加权每股 {_fmt(pe.get('probability_weighted_per_share'), 'pe weighted')} {currency}；"
+                "仅在盈利口径与倍数质量门槛通过时作为基本面目标候选。"
+            )
+        else:
+            priced_in.append(
+                f"- PE：已计算但质量门槛为 {pe_quality or 'unknown'}，不构成价值目标。"
+            )
+    else:
+        priced_in.append("- PE：未请求或未计算；需要显式的前瞻/正常化 EPS 与情景 P/E 倍数。")
     priced_in.append(
         "- 反向 DCF 与 PVGO 均为市场隐含条件与预期分解，仅供对照，不构成价值目标。"
     )
@@ -1308,6 +1432,15 @@ def render_underwriting(fixture: dict[str, Any], base_dir: Path | None = None) -
     lines = [
         f"# 深度研究：{symbol}",
         "",
+        *_report_summary_lines(
+            symbol,
+            issuer,
+            mode,
+            currency,
+            earnings_quality,
+            trade_plan,
+            valuation,
+        ),
         f"- 身份：issuer_id={identity['issuer_id']}；listing_id={identity['listing_id']}；"
         f"case_id={case_id}；artifact_version={identity['artifact_version']}",
         f"- 模式：{MODES[mode]}（{mode}）",
@@ -1463,6 +1596,11 @@ def _md_lines_to_html(lines: list[str], collapsible: set[str]) -> str:
     while index < len(lines):
         line = lines[index]
         stripped = line.strip()
+        if stripped.startswith("## "):
+            close_details()
+            out.append(f"<h2>{_md_inline(stripped[3:].strip())}</h2>")
+            index += 1
+            continue
         if stripped.startswith("### "):
             close_details()
             title = stripped[4:].strip()
@@ -1518,18 +1656,20 @@ def _watch_valuation_cards(
 ) -> list[tuple[str, str]]:
     """Valuation reference cards for a watch trade plan.
 
-    Only a driver-based DCF whose generic quality gate is ``usable`` may be
-    shown as 定制 DCF 参考值 / 参考区间；a ``conditional`` gate is shown as
-    条件性模型输出，and anything else — including the legacy baseline DCF
-    whose cash-flow path is hand-supplied rather than driver-derived — is
-    shown as 基本面目标 未形成 / 估值模型状态 待重建，never as a 基本面估值锚.
+    A usable driver-based DCF takes precedence over a usable PE model. If the
+    DCF is only conditional, a usable PE model is still shown; this keeps the
+    display order aligned with the trade-plan value-source resolver. Anything
+    else — including the legacy baseline DCF whose cash-flow path is
+    hand-supplied rather than driver-derived — is shown as 基本面目标 未形成 /
+    估值模型状态 待重建, never as a 基本面估值锚.
     Reads only values already computed in the valuation artifact and shows
     every finite value verbatim — the renderer adds no positivity or ordering
     rules of its own; only missing or non-finite values fail closed to
-    未计算. When no DCF applies, the first computed EPV/EVA/SOTP point
-    estimate keeps the legacy non-actionable anchor card."""
+    未计算. When no quality-gated DCF/PE model applies, the first computed
+    EPV/EVA/SOTP point estimate keeps the legacy non-actionable anchor card."""
     results = valuation.get("results")
     results = results if isinstance(results, dict) else {}
+    deferred_cards: list[tuple[str, str]] | None = None
     driver = results.get("driver_dcf")
     if isinstance(driver, dict) and driver.get("status") == "computed":
         quality_status = _driver_dcf_quality(driver)
@@ -1551,14 +1691,48 @@ def _watch_valuation_cards(
                 ("定制 DCF 参考区间", zone_text),
             ]
         if quality_status == "conditional":
-            return [
+            deferred_cards = [
                 (
                     "条件性模型输出",
                     f"{_fmt(weighted)} {currency}" if weighted is not None else "未计算",
                 ),
                 ("估值参考区间", zone_text),
             ]
-        return [("基本面目标", "未形成"), ("估值模型状态", "待重建")]
+        else:
+            deferred_cards = [("基本面目标", "未形成"), ("估值模型状态", "待重建")]
+    pe = results.get("pe")
+    if isinstance(pe, dict) and pe.get("status") == "computed":
+        quality_status = _pe_quality_status(pe)
+        weighted = _finite_number(pe.get("probability_weighted_per_share"))
+        zone = pe.get("value_zone")
+        low = _finite_number(zone.get("low")) if isinstance(zone, dict) else None
+        high = _finite_number(zone.get("high")) if isinstance(zone, dict) else None
+        zone_text = (
+            f"{_fmt(low)} – {_fmt(high)} {currency}"
+            if low is not None and high is not None
+            else "未计算"
+        )
+        if quality_status == "usable":
+            return [
+                (
+                    "PE 参考值",
+                    f"{_fmt(weighted)} {currency}" if weighted is not None else "未计算",
+                ),
+                ("PE 参考区间", zone_text),
+            ]
+        if quality_status == "conditional":
+            if deferred_cards is None:
+                deferred_cards = [
+                    (
+                        "条件性 PE 输出",
+                        f"{_fmt(weighted)} {currency}" if weighted is not None else "未计算",
+                    ),
+                    ("估值参考区间", zone_text),
+                ]
+        elif deferred_cards is None:
+            deferred_cards = [("基本面目标", "未形成"), ("估值模型状态", "待重建")]
+    if deferred_cards is not None:
+        return deferred_cards
     dcf = results.get("dcf")
     if isinstance(dcf, dict) and dcf.get("status") == "computed":
         return [
@@ -1581,6 +1755,116 @@ def _watch_valuation_cards(
             ("估值参考区间", "未计算"),
         ]
     return [("基本面目标", "未形成"), ("估值模型状态", "待重建")]
+
+
+def _summary_number(value: object) -> str | None:
+    number = _finite_number(value)
+    if number is None:
+        return None
+    text = f"{number:,.2f}".rstrip("0").rstrip(".")
+    return text
+
+
+def _summary_money(value: object, currency: str) -> str:
+    text = _summary_number(value)
+    return f"{text} {currency}" if text is not None else "未计算"
+
+
+def _summary_zone(zone: object, currency: str) -> str:
+    if not isinstance(zone, dict):
+        return "未计算"
+    low = _finite_number(zone.get("low"))
+    high = _finite_number(zone.get("high"))
+    if low is None or high is None:
+        return "未计算"
+    return f"{_summary_number(low)}–{_summary_number(high)} {currency}"
+
+
+def _valuation_reference_summary(
+    valuation: dict[str, Any], currency: str
+) -> str:
+    results = valuation.get("results")
+    if not isinstance(results, dict):
+        return "未计算"
+    references: list[str] = []
+    driver = results.get("driver_dcf")
+    if isinstance(driver, dict) and driver.get("status") == "computed":
+        quality = _driver_dcf_quality(driver)
+        zone_text = _summary_zone(driver.get("value_zone"), currency)
+        references.append(
+            f"驱动型 DCF {_summary_money(driver.get('probability_weighted_per_share'), currency)}"
+            f"（区间 {zone_text}，{quality or 'unknown'}）"
+        )
+    pe = results.get("pe")
+    if isinstance(pe, dict):
+        if pe.get("status") == "computed":
+            quality = _pe_quality_status(pe)
+            zone_text = _summary_zone(pe.get("value_zone"), currency)
+            references.append(
+                f"PE {_summary_money(pe.get('probability_weighted_per_share'), currency)}"
+                f"（区间 {zone_text}，{quality or 'unknown'}）"
+            )
+        elif pe.get("status") == "missing_inputs":
+            references.append("PE 未计算（缺少前瞻/正常化 EPS 或情景倍数）")
+        elif pe.get("status") == "not_applicable":
+            references.append("PE 不适用")
+    else:
+        references.append("PE 未请求")
+    dcf = results.get("dcf")
+    if isinstance(dcf, dict) and dcf.get("status") == "computed":
+        zone_text = _summary_zone(dcf.get("value_zone"), currency)
+        references.append(
+            f"DCF 基线 {_summary_money(dcf.get('probability_weighted_per_share'), currency)}"
+            f"（区间 {zone_text}，仅留档）"
+        )
+    return "；".join(references) if references else "未计算"
+
+
+def _report_summary_lines(
+    symbol: str,
+    issuer: dict[str, str],
+    mode: str,
+    currency: str,
+    earnings_quality: dict[str, Any],
+    trade_plan: dict[str, Any],
+    valuation: dict[str, Any],
+) -> list[str]:
+    """Make the deliverable status and decision cards visible in Markdown too."""
+    target_plan = trade_plan.get("target_plan")
+    fundamental = target_plan.get("fundamental_target") if isinstance(target_plan, dict) else None
+    fundamental_level = fundamental.get("level") if isinstance(fundamental, dict) else None
+    if fundamental_level is not None:
+        fundamental_text = _summary_money(fundamental_level, currency)
+        if isinstance(fundamental, dict) and fundamental.get("basis"):
+            fundamental_text += f"（{_fundamental_target_label(fundamental.get('basis'))}）"
+    else:
+        fundamental_text = "未计算（未形成可用基本面目标）"
+    entry_plan = trade_plan.get("entry_plan")
+    value_band = entry_plan.get("value_band") if isinstance(entry_plan, dict) else None
+    if isinstance(value_band, dict) and value_band.get("low") is not None and value_band.get("high") is not None:
+        value_zone_text = (
+            f"{_summary_money(value_band.get('low'), currency)}–"
+            f"{_summary_money(value_band.get('high'), currency)}"
+        )
+    else:
+        value_zone_text = "未计算（watch 不输出交易价值带）"
+    grade = _text(earnings_quality.get("grade"), "earnings-quality grade")
+    status = _text(trade_plan.get("status"), "trade-plan status")
+    return [
+        "## 报告摘要",
+        "",
+        "| 项目 | 结果 |",
+        "| --- | --- |",
+        f"| 报告名称 | 深度研究：{issuer['company_name']}（{symbol}） |",
+        "| 产出状态 | 已完成 |",
+        f"| 研究模式 | {MODES[mode]} |",
+        f"| 财报质量级别 | **{grade}** |",
+        f"| 基本面目标 | **{fundamental_text}** |",
+        f"| 价值区间 | **{value_zone_text}** |",
+        f"| 方案状态 | **{status}** |",
+        f"| 估值参考 | {_valuation_reference_summary(valuation, currency)} |",
+        "",
+    ]
 
 
 def render_html(fixture: dict[str, Any], markdown: str) -> str:
@@ -1670,13 +1954,13 @@ def render_html(fixture: dict[str, Any], markdown: str) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>深度研究：{html_lib.escape(symbol)}</title>
+<title>深度研究报告：{html_lib.escape(symbol)}</title>
 <style>
 {HTML_CSS}
 </style>
 </head>
 <body>
-<h1>深度研究：{html_lib.escape(symbol)}</h1>
+<h1>深度研究报告：{html_lib.escape(symbol)}</h1>
 <div class="cards">{card_html}</div>
 {header_html}
 <nav class="toc"><strong>目录</strong><ol>{toc_items}</ol></nav>

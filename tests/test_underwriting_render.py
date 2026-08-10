@@ -92,22 +92,59 @@ def driver_dcf_artifact(quality_status: str = "usable") -> dict:
     }
 
 
+def pe_artifact(quality_status: str = "usable") -> dict:
+    """Generic PE result block for renderer tests (no real issuer)."""
+    return {
+        "model_kind": "pe_multiple",
+        "model_version": "v1.0.3-valuation-1",
+        "method": "pe",
+        "status": "computed",
+        "earnings_basis": "forward_eps",
+        "basis_rationale": "离线验收示例：前瞻 EPS 与情景 P/E 倍数。",
+        "scenarios": [
+            {"name": "bear", "probability": 0.25, "eps": 4.0, "pe_multiple": 15.0, "per_share": 60.0},
+            {"name": "base", "probability": 0.5, "eps": 5.0, "pe_multiple": 20.0, "per_share": 100.0},
+            {"name": "bull", "probability": 0.25, "eps": 6.0, "pe_multiple": 25.0, "per_share": 150.0},
+        ],
+        "probability_weighted_eps": 5.0,
+        "probability_weighted_per_share": 102.5,
+        "value_zone": {"low": 60.0, "high": 102.5},
+        "current_price": 100.0,
+        "current_pe": 20.0,
+        "quality": {
+            "status": quality_status,
+            "flags": [],
+            "reasons": ["离线验收示例：PE 质量门槛。"],
+        },
+        "inputs_provenance": {"shared": {}, "scenarios": {}},
+    }
+
+
 def run_renderer(fixture: dict, directory: Path, html: bool = False) -> subprocess.CompletedProcess:
     input_path = directory / "inputs.json"
     input_path.write_text(json.dumps(fixture, ensure_ascii=False), encoding="utf-8")
-    evidence = json.loads(
-        (FIXTURES / "technical-evidence.json").read_text(encoding="utf-8")
-    )
-    # Each fixture may reference a different observation timestamp while
-    # reusing the same identity/evidence id.  Stage an artifact whose payload
-    # agrees with that explicit reference, preserving the renderer's exact
-    # path-and-timestamp integrity check.
+    # Stage exactly the evidence artifact the fixture references, keeping its
+    # full portable relative path (same validation as the renderer): copy
+    # tests/fixtures/<relative path> to <staging>/<relative path>, creating
+    # parent directories.  No fallback, no timestamp rewrite; an unportable
+    # or missing reference stages nothing so the renderer fails closed and
+    # the failure surfaces in the test.
     evidence_ref = fixture.get("technical_evidence_ref")
-    if isinstance(evidence_ref, dict) and isinstance(evidence_ref.get("as_of"), str):
-        evidence["as_of"] = evidence_ref["as_of"]
-    (directory / "technical-evidence.json").write_text(
-        json.dumps(evidence, ensure_ascii=False), encoding="utf-8"
+    evidence_rel = "technical-evidence.json"
+    if isinstance(evidence_ref, dict) and isinstance(evidence_ref.get("artifact_path"), str):
+        evidence_rel = evidence_ref["artifact_path"]
+    candidate = Path(evidence_rel)
+    portable = (
+        not candidate.is_absolute()
+        and "\\" not in evidence_rel
+        and ":" not in evidence_rel
+        and ".." not in candidate.parts
     )
+    source_evidence = FIXTURES / candidate
+    if portable and source_evidence.is_file():
+        target = directory / candidate
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(source_evidence.read_bytes())
     command = [
         sys.executable,
         str(SCRIPT),
@@ -160,6 +197,33 @@ class UnderwritingRenderTests(unittest.TestCase):
         for word in TRADE_DIRECTIVE_WORDS:
             self.assertNotIn(word, markdown)
 
+    def test_repo_fixtures_reference_consistent_evidence_artifacts(self) -> None:
+        # 防漂移回归：每个仓库 fixture 引用的技术证据 artifact 必须真实存在，
+        # 且 as_of / evidence_id / identity 与引用逐项一致；任何漂移都在此
+        # 暴露，而不是被测试 harness 修补。
+        for name in (
+            "underwriting-inputs-initial.json",
+            "underwriting-inputs-short-baseline.json",
+            "underwriting-inputs-earnings-no-prior.json",
+            "underwriting-inputs-epv-basis.json",
+            "underwriting-inputs-watch.json",
+        ):
+            with self.subTest(fixture=name):
+                fixture = load_fixture(name)
+                ref = fixture["technical_evidence_ref"]
+                evidence = json.loads(
+                    (FIXTURES / ref["artifact_path"]).read_text(encoding="utf-8")
+                )
+                self.assertEqual(evidence["as_of"], ref["as_of"])
+                self.assertEqual(evidence["evidence_id"], ref["evidence_id"])
+                self.assertEqual(evidence["identity"], ref["identity"])
+        # watch 场景必须引用专用的过期证据 fixture。
+        watch = load_fixture("underwriting-inputs-watch.json")
+        self.assertEqual(
+            watch["technical_evidence_ref"]["artifact_path"],
+            "technical-evidence-watch.json",
+        )
+
     def test_earnings_update_without_prior_model_degrades(self) -> None:
         _, markdown = self.render("underwriting-inputs-earnings-no-prior.json")
         self.assertIn("财报更新模式", markdown)
@@ -193,6 +257,44 @@ class UnderwritingRenderTests(unittest.TestCase):
         self.assertNotIn("src='http", html_view)
         self.assertNotIn('href="http', html_view)
         self.assertNotIn("href='http", html_view)
+
+    def test_report_summary_is_visible_in_markdown_and_html(self) -> None:
+        _, markdown = self.render("underwriting-inputs-watch.json", html=True)
+        html_view = (self.workdir / "underwriting.html").read_text(encoding="utf-8")
+        self.assertIn("## 报告摘要", markdown)
+        self.assertIn("| 产出状态 | 已完成 |", markdown)
+        self.assertIn("| 财报质量级别 | **A** |", markdown)
+        self.assertIn("| 基本面目标 | **未计算（未形成可用基本面目标）** |", markdown)
+        self.assertIn("| 价值区间 | **未计算（watch 不输出交易价值带）** |", markdown)
+        self.assertIn("深度研究报告：CLEAN.US", html_view)
+        self.assertIn("<h2>报告摘要</h2>", html_view)
+
+    def test_watch_pe_reference_is_rendered_as_non_actionable_until_usable(self) -> None:
+        fixture = load_fixture("underwriting-inputs-watch.json")
+        fixture["valuation"]["results"]["dcf"] = {
+            "status": "missing_inputs",
+            "missing": ["price"],
+        }
+        fixture["valuation"]["results"]["pe"] = pe_artifact("usable")
+        result = run_renderer(fixture, self.workdir, html=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        markdown = (self.workdir / "underwriting.md").read_text(encoding="utf-8")
+        html_view = (self.workdir / "underwriting.html").read_text(encoding="utf-8")
+        self.assertIn("PE 参考值（可作为基本面目标候选）：**102.5 USD**", markdown)
+        self.assertIn('<div class="card-title">PE 参考值</div>', html_view)
+        self.assertIn('<div class="card-value">102.5 USD</div>', html_view)
+        self.assertIn("PE 102.5 USD", markdown)
+
+    def test_watch_usable_pe_overrides_conditional_driver_dcf_card(self) -> None:
+        fixture = load_fixture("underwriting-inputs-watch.json")
+        fixture["valuation"]["results"]["driver_dcf"] = driver_dcf_artifact("conditional")
+        fixture["valuation"]["results"]["pe"] = pe_artifact("usable")
+        result = run_renderer(fixture, self.workdir, html=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        html_view = (self.workdir / "underwriting.html").read_text(encoding="utf-8")
+        self.assertIn('<div class="card-title">PE 参考值</div>', html_view)
+        self.assertIn('<div class="card-value">102.5 USD</div>', html_view)
+        self.assertNotIn('<div class="card-title">条件性模型输出</div>', html_view)
 
     def test_case_id_mismatch_rejected(self) -> None:
         fixture = load_fixture("underwriting-inputs-initial.json")

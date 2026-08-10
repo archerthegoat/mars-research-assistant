@@ -1,8 +1,0 @@
-{
-  "operation": "initialize",
-  "drive_snapshot": {
-    "my_drive_id": "my-drive-001",
-    "items": []
-  },
-  "confirmation": null
-}

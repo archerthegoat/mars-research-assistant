@@ -312,11 +312,42 @@ class MarketPreferencesCliTests(unittest.TestCase):
 
     def test_out_of_scope_offers_exactly_two_options(self) -> None:
         self._set_scopes("hk")
-        payload = self._run_ok("resolve", "--query", "AAPL")
+        payload = self._run_ok("resolve", "--query", "AAPL.US")
         self.assertEqual(payload["status"], "out_of_scope")
         self.assertEqual(payload["market_scope"], "us")
         self.assertEqual(payload["options"], ["once", "add_to_scope"])
         self.assertEqual(self._read_preferences_file()["enabled_market_scopes"], ["hk"])
+
+    def test_bare_alpha_ambiguous_when_us_is_not_sole_base_scope(self) -> None:
+        # 裸字母 ticker 只有在美股是唯一已启用基础范围时才 resolved；
+        # 仅 HK、仅 A 股、HK+A 都必须 ambiguous/needs_user_selection，
+        # 候选只列已启用市场，绝不返回 out_of_scope/us。
+        for scopes, expected_candidates in (
+            ("hk", {"hk"}),
+            ("a_share", {"a_share"}),
+            ("hk,a_share", {"hk", "a_share"}),
+        ):
+            with self.subTest(scopes=scopes):
+                self._set_scopes(scopes)
+                payload = self._run_ok("resolve", "--query", "LITE")
+                self.assertEqual(payload["status"], "ambiguous")
+                self.assertTrue(payload["needs_user_selection"])
+                self.assertEqual(payload["reason"], "bare_alpha_multiple_scopes")
+                self.assertEqual(payload["query_kind"], "ticker")
+                self.assertEqual(payload["query"], "LITE")
+                self.assertEqual(
+                    {c["market_scope"] for c in payload["candidates"]},
+                    expected_candidates,
+                )
+                self.assertNotIn("listing_candidates", payload)
+                self.assertNotIn("market_scope", payload)
+                self.assertNotIn("options", payload)
+
+        self._set_scopes("us")
+        payload = self._run_ok("resolve", "--query", "LITE")
+        self.assertEqual(payload["status"], "resolved")
+        self.assertEqual(payload["market_scope"], "us")
+        self.assertEqual(payload["reason"], "bare_alpha_ticker")
 
     def test_once_scope_resolves_without_persisting(self) -> None:
         self._set_scopes("us")

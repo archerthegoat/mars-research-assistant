@@ -292,6 +292,45 @@ class TradePlanTests(unittest.TestCase):
         self.assertEqual(plan["gates"]["valuation"]["pass"], True)
         self.assertIn("驱动型 DCF", plan["gates"]["valuation"]["reason"])
 
+    def test_pe_usable_becomes_value_source_when_dcf_is_not_applicable(self) -> None:
+        valuation = self._valuation()
+        valuation["results"]["dcf"] = {
+            "status": "not_applicable",
+            "reason": "离线验收示例：改用 PE。",
+        }
+        valuation["results"]["pe"] = {
+            "model_kind": "pe_multiple",
+            "model_version": "v1.0.3-valuation-1",
+            "method": "pe",
+            "status": "computed",
+            "earnings_basis": "forward_eps",
+            "basis_rationale": "离线验收示例：前瞻 EPS。",
+            "scenarios": [
+                {"name": "bear", "probability": 0.25, "eps": 1.0, "pe_multiple": 12.0, "per_share": 12.0},
+                {"name": "base", "probability": 0.5, "eps": 1.0, "pe_multiple": 14.0, "per_share": 14.0},
+                {"name": "bull", "probability": 0.25, "eps": 1.0, "pe_multiple": 16.0, "per_share": 16.0},
+            ],
+            "probability_weighted_eps": 1.0,
+            "probability_weighted_per_share": 14.0,
+            "value_zone": {"low": 12.0, "high": 14.0},
+            "quality": {
+                "status": "usable",
+                "flags": [],
+                "reasons": ["离线验收示例：PE 质量门槛通过。"],
+            },
+        }
+        earnings = self._earnings()
+        evidence = self._fixture_evidence("technical-evidence-qualified.json")
+        result, plan, _ = self._run_trade_plan(
+            valuation, self._evidence_path(evidence), earnings,
+            output_name="trade-plan-pe.json",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(plan["target_plan"]["fundamental_target"]["basis"], "pe")
+        self.assertEqual(plan["target_plan"]["fundamental_target"]["level"], 14.0)
+        self.assertTrue(plan["gates"]["valuation"]["pass"])
+        self.assertIn("PE 模型", plan["gates"]["valuation"]["reason"])
+
     def test_driver_dcf_below_gate_forms_no_fundamental_target(self) -> None:
         # 已提供 driver_model 但质量门槛非 usable：不形成基本面目标，也
         # 不得回退把旧 baseline DCF 包装成目标价。

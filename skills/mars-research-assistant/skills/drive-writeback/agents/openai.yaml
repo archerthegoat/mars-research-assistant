@@ -1,4 +1,4 @@
 interface:
   display_name: "Drive 写入"
-  short_description: "分别确认后幂等初始化交易研究中心或归档已完成研究"
-  default_prompt: "使用 $drive-writeback 提议初始化交易研究中心，或提议归档一份已完成研究；两个操作分别确认。"
+  short_description: "分别确认后初始化投研工作台，或写入交易想法、已确定方案、决策变更与复盘"
+  default_prompt: "使用 $drive-writeback 提议初始化投研工作台，或提议向工作台写入交易想法或已确定方案；两个操作分别确认。"

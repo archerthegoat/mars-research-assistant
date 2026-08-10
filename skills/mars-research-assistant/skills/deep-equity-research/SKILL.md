@@ -41,6 +41,12 @@ A/H 对比四个可一次多选的选项，不得暗示单选；裸 ticker 可�
 `trade-plan.html` 仅在技术质量门通过且价值/技术区间有交集时生成。每个 artifact 携带
 `issuer_id`、`listing_id`、`case_id` 与版本信息；A/H 对比共用一个 `case_id`。
 
+每次研究必须创建一个用户可辨认的唯一研究包目录，命名为
+`{listing_id}-{YYYYMMDD}-deep-research-{initial|earnings-update}-{NN}`（交易所后缀和
+文件名中的非法字符先规范化）。例如 `LITE-20260806-deep-research-initial-01/`；目录内
+沿用上述标准 artifact 文件名。最终回复必须明确写出“产出状态：已完成”、报告名称和该目录，
+不能只给出 `rerun`、`case_id` 或裸文件名。
+
 九章固定：研究范围、预注册命题与交易结论；公司、业务模式与价值驱动；行业结构、竞争与
 行业专属反证；管理层、治理与资本配置；财务、分部/KPI 与财报质量；预期差、催化剂、
 基准率与跟踪清单；可复算估值与“现价定价了什么”；反方论证、事前风险预演与可证伪
@@ -50,8 +56,12 @@ A/H 对比四个可一次多选的选项，不得暗示单选；裸 ticker 可�
 ## 估值、财报质量与交易方案
 
 - 估值一律由 `scripts/dcf.py` 运行并写入 `valuation.json`：三情景概率加权 DCF、反向
-  DCF、PVGO、EPV、EVA/剩余收益、适用时 SOTP 与可选蒙特卡洛；概率显式且合计为 1，终值
-  三查留档；不适用或缺输入显式记录，语言模型不得心算或补造数字。
+  DCF、PVGO、PE/正常化 EPS、EPV、EVA/剩余收益、适用时 SOTP 与可选蒙特卡洛；概率显式且
+  合计为 1，终值三查留档；不适用或缺输入显式记录，语言模型不得心算或补造数字。
+- PE 只能消费显式的 `forward_eps`、`normalized_eps` 或经复核的 `trailing_eps` 与情景
+  `pe_multiple`；亏损/非正 EPS、一次性利润未剔除或缺少来源时标为不适用/条件性输出，不能
+  把当前价格反推成目标倍数。PE 与驱动型 DCF 都必须通过各自质量门槛后，才有资格形成基本面
+  目标；否则仅作为参考或留档。
 - 旧三情景 DCF 为可审计 baseline（`model_role: "baseline"`），其手工给定的现金流
   路径不构成基本面目标。可选的通用驱动型 DCF（`models.dcf.driver_model`）按
   NOPAT = revenue × operating_margin × (1 − tax_rate)、FCF = NOPAT + D&A − capex − ΔNWC

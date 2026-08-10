@@ -289,8 +289,11 @@ def _verify_manifest_and_skills() -> None:
     if not {"broad_search", "rerun_deep_research", "auto_invoke_other_skills"} <= analysis_forbidden:
         _fail("investment-analysis must forbid broad search and auto-invocation")
     drive = _read_json(SKILLS / "drive-writeback" / "capability.json")
-    if "workbench_write" not in drive.get("supported_operations", []):
-        _fail("drive-writeback must declare the workbench write operation")
+    if drive.get("supported_operations") != ["initialize_workbench", "workbench_write"]:
+        _fail("drive-writeback must expose exactly workbench initialization and workbench writes")
+    retired = {"archive_completed_research", "archive_contract", "archive_routes"}
+    if retired & set(drive) or "archive_completed_research" in json.dumps(drive):
+        _fail("drive-writeback must not expose the retired research archive flow")
     workbench = drive.get("workbench_contract", {})
     if workbench.get("sections") != ["idea_log", "current_plan", "decision_log", "review_log"]:
         _fail("drive workbench must keep the four master-document sections")

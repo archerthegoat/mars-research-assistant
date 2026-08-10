@@ -561,6 +561,111 @@ class ValuationEngineTests(unittest.TestCase):
                 self.assertIn("trade directive", result.stderr)
                 self.assertFalse(output.exists())
 
+    def test_pe_multiple_computes_forward_eps_reference(self) -> None:
+        fixture = json.loads(FULL_FIXTURE.read_text(encoding="utf-8"))
+        source = {
+            "name": "Example PE assumption",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/pe",
+        }
+        fixture["models"]["pe"] = {
+            "status": "requested",
+            "price": {
+                "value": 100.0,
+                "source": {
+                    "name": "Example public quote",
+                    "kind": "public_quote",
+                    "as_of": "2026-07-30T00:00:00Z",
+                    "url": "https://example.com/quote",
+                },
+            },
+            "earnings_basis": "forward_eps",
+            "basis_rationale": "离线验收示例：下一财年 EPS 作为前瞻口径。",
+            "scenarios": [
+                {
+                    "name": "bear",
+                    "probability": {"value": 0.25, "rationale": "保守盈利情景。", "source": source},
+                    "eps": {"value": 4.0, "source": source},
+                    "pe_multiple": {"value": 15.0, "source": source},
+                },
+                {
+                    "name": "base",
+                    "probability": {"value": 0.5, "rationale": "基准盈利情景。", "source": source},
+                    "eps": {"value": 5.0, "source": source},
+                    "pe_multiple": {"value": 20.0, "source": source},
+                },
+                {
+                    "name": "bull",
+                    "probability": {"value": 0.25, "rationale": "乐观盈利情景。", "source": source},
+                    "eps": {"value": 6.0, "source": source},
+                    "pe_multiple": {"value": 25.0, "source": source},
+                },
+            ],
+        }
+        with tempfile.TemporaryDirectory(prefix="mars-v103-pe-") as temporary:
+            fixture_path = Path(temporary) / "pe-input.json"
+            output = Path(temporary) / "mars-research" / "valuation.json"
+            fixture_path.write_text(json.dumps(fixture, ensure_ascii=False), encoding="utf-8")
+            result = self._run(fixture_path, output)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            artifact = json.loads(output.read_text(encoding="utf-8"))
+        pe = artifact["results"]["pe"]
+        self.assertEqual(pe["status"], "computed")
+        self.assertEqual(pe["quality"]["status"], "usable")
+        self.assertAlmostEqual(pe["probability_weighted_eps"], 5.0, delta=1e-6)
+        self.assertAlmostEqual(pe["probability_weighted_per_share"], 102.5, delta=1e-6)
+        self.assertAlmostEqual(pe["value_zone"]["low"], 60.0, delta=1e-6)
+        self.assertAlmostEqual(pe["current_pe"], 20.0, delta=1e-6)
+
+    def test_pe_trailing_eps_is_conditional_and_non_positive_eps_fails_closed(self) -> None:
+        fixture = json.loads(FULL_FIXTURE.read_text(encoding="utf-8"))
+        source = {
+            "name": "Example PE assumption",
+            "kind": "valuation_assumption",
+            "as_of": "2026-07-30T00:00:00Z",
+            "url": "https://example.com/pe",
+        }
+        fixture["models"]["pe"] = {
+            "status": "requested",
+            "price": {"value": 100.0, "source": source},
+            "earnings_basis": "trailing_eps",
+            "basis_rationale": "离线验收示例：历史 EPS，需复核一次性项目。",
+            "scenarios": [
+                {
+                    "name": name,
+                    "probability": {"value": probability, "rationale": f"{name} 情景。"},
+                    "eps": {"value": eps, "source": source},
+                    "pe_multiple": {"value": multiple, "source": source},
+                }
+                for name, probability, eps, multiple in (
+                    ("bear", 0.25, 4.0, 15.0),
+                    ("base", 0.5, 5.0, 20.0),
+                    ("bull", 0.25, 6.0, 25.0),
+                )
+            ],
+        }
+        with tempfile.TemporaryDirectory(prefix="mars-v103-pe-") as temporary:
+            fixture_path = Path(temporary) / "pe-input.json"
+            output = Path(temporary) / "mars-research" / "valuation.json"
+            fixture_path.write_text(json.dumps(fixture, ensure_ascii=False), encoding="utf-8")
+            result = self._run(fixture_path, output)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            artifact = json.loads(output.read_text(encoding="utf-8"))
+        self.assertEqual(artifact["results"]["pe"]["quality"]["status"], "conditional")
+
+        fixture["models"]["pe"]["scenarios"][1]["eps"]["value"] = 0.0
+        with tempfile.TemporaryDirectory(prefix="mars-v103-pe-") as temporary:
+            fixture_path = Path(temporary) / "pe-input.json"
+            output = Path(temporary) / "mars-research" / "valuation.json"
+            fixture_path.write_text(json.dumps(fixture, ensure_ascii=False), encoding="utf-8")
+            result = self._run(fixture_path, output)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            artifact = json.loads(output.read_text(encoding="utf-8"))
+        pe = artifact["results"]["pe"]
+        self.assertEqual(pe["status"], "invalid_inputs")
+        self.assertNotIn("probability_weighted_per_share", pe)
+
 
 DRIVER_SOURCE = {
     "name": "Example driver assumption",

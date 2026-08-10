@@ -2,10 +2,10 @@
 """Reproducible valuation engine for deep equity research (v1.0.3 Batch 3).
 
 Runs the contract-frozen model set — probability-weighted three-scenario DCF,
-reverse DCF, PVGO decomposition, EPV, EVA/residual income, SOTP and a seeded
-Monte Carlo — from an explicit JSON input and writes a recomputable JSON
-artifact. Missing inputs fail closed per model; no fair-value number is ever
-invented.
+reverse DCF, PVGO decomposition, PE/earnings multiple, EPV, EVA/residual
+income, SOTP and a seeded Monte Carlo — from an explicit JSON input and writes
+a recomputable JSON artifact. Missing inputs fail closed per model; no
+fair-value number is ever invented.
 
 The legacy three-scenario DCF (``results.dcf``) discounts hand-supplied
 ``scenario.free_cash_flows`` and is kept as an auditable baseline
@@ -58,7 +58,16 @@ PROBABILITY_TOLERANCE = 1e-6
 REVERSE_DCF_GROWTH_BOUNDS = (-0.95, 3.0)
 REVERSE_DCF_ITERATIONS = 120
 SCENARIO_NAMES = ("bear", "base", "bull")
-MODEL_ORDER = ("dcf", "reverse_dcf", "pvgo", "epv", "eva", "sotp", "monte_carlo")
+MODEL_ORDER = (
+    "dcf",
+    "reverse_dcf",
+    "pvgo",
+    "pe",
+    "epv",
+    "eva",
+    "sotp",
+    "monte_carlo",
+)
 RUNTIME_ROOT = Path(__file__).resolve().parents[3]
 TRADE_DIRECTIVE = re.compile(
     r"买入|卖出|增持|减持|加仓|减仓|建仓|平仓|下单|持仓比例|做空|沽空|卖空|"
@@ -101,6 +110,7 @@ EVA_REQUIRED = (
     "shares_outstanding",
 )
 SOTP_REQUIRED = ("net_debt", "shares_outstanding", "holding_discount")
+PE_EARNINGS_BASES = {"trailing_eps", "forward_eps", "normalized_eps"}
 SOURCE_KINDS = {
     "sec_filing",
     "regulatory_filing",
@@ -1194,6 +1204,268 @@ def _run_pvgo(
     )
 
 
+def _parse_pe_scenarios(
+    raw: object,
+) -> tuple[list[dict[str, Any]], list[str], dict[str, Any], list[str]]:
+    """Parse explicit EPS and P/E assumptions without manufacturing earnings."""
+    if not isinstance(raw, list) or len(raw) != 3:
+        raise ValuationError("pe requires exactly three scenarios")
+    scenarios: list[dict[str, Any]] = []
+    missing: list[str] = []
+    provenance: dict[str, Any] = {}
+    source_gaps: list[str] = []
+    names: set[str] = set()
+    for index, item in enumerate(raw):
+        context = f"pe scenarios[{index}]"
+        if not isinstance(item, dict):
+            raise ValuationError(f"{context} requires an object")
+        scenario_source = (
+            _source(item["source"], context) if item.get("source") is not None else None
+        )
+        name = _text(item.get("name"), context)
+        if name in names:
+            raise ValuationError("pe scenario names must be unique")
+        names.add(name)
+        probability, probability_provenance = _provenance(
+            item.get("probability"),
+            f"{context} probability",
+            inherited_from="scenario",
+            fallback_source=scenario_source,
+        )
+        eps, eps_provenance = _provenance(
+            item.get("eps"),
+            f"{context} eps",
+            inherited_from="scenario",
+            fallback_source=scenario_source,
+        )
+        multiple, multiple_provenance = _provenance(
+            item.get("pe_multiple"),
+            f"{context} pe_multiple",
+            inherited_from="scenario",
+            fallback_source=scenario_source,
+        )
+        record: dict[str, Any] = {
+            "name": name,
+            "probability": probability,
+            "rationale": None,
+            "eps": eps,
+            "pe_multiple": multiple,
+        }
+        inputs_provenance: dict[str, Any] = {}
+        if probability is None:
+            missing.append(f"scenarios[{index}].probability")
+        else:
+            assert probability_provenance is not None
+            inputs_provenance["probability"] = probability_provenance
+            if probability_provenance["source"] is None:
+                source_gaps.append(f"scenarios[{index}].probability")
+        probability_input = item.get("probability")
+        if not isinstance(probability_input, dict) or probability_input.get("rationale") is None:
+            missing.append(f"scenarios[{index}].probability.rationale")
+        else:
+            record["rationale"] = _guarded_text(
+                probability_input["rationale"],
+                f"{context} probability rationale",
+            )
+        if eps is None:
+            missing.append(f"scenarios[{index}].eps")
+        else:
+            assert eps_provenance is not None
+            inputs_provenance["eps"] = eps_provenance
+            if eps_provenance["source"] is None:
+                source_gaps.append(f"scenarios[{index}].eps")
+        if multiple is None:
+            missing.append(f"scenarios[{index}].pe_multiple")
+        else:
+            assert multiple_provenance is not None
+            inputs_provenance["pe_multiple"] = multiple_provenance
+            if multiple_provenance["source"] is None:
+                source_gaps.append(f"scenarios[{index}].pe_multiple")
+        provenance[name] = inputs_provenance
+        scenarios.append(record)
+    return scenarios, missing, provenance, source_gaps
+
+
+def _pe_quality(
+    basis: str,
+    price_provenance: dict[str, Any] | None,
+    scenarios: list[dict[str, Any]],
+    scenario_provenance: dict[str, Any],
+    weighted_eps: float,
+    computed_moment: datetime,
+) -> dict[str, Any]:
+    """Apply generic quality gates for a P/E reference value."""
+    reasons: list[str] = []
+    flags: list[str] = []
+    conditional = False
+    if basis == "trailing_eps":
+        conditional = True
+        reasons.append("trailing EPS 未证明已剔除一次性项目，不能单独形成基本面目标。")
+        flags.append("trailing_eps_requires_normalization_review")
+    records: list[tuple[str, dict[str, Any] | None]] = [("price", price_provenance)]
+    for scenario in scenarios:
+        inputs = scenario_provenance.get(scenario["name"], {})
+        records.extend(
+            (
+                f"{scenario['name']}.{field}",
+                inputs.get(field) if isinstance(inputs, dict) else None,
+            )
+            for field in ("eps", "pe_multiple")
+        )
+        probability_record = inputs.get("probability") if isinstance(inputs, dict) else None
+        records.append((f"{scenario['name']}.probability", probability_record))
+    for label, record in records:
+        if not isinstance(record, dict) or not isinstance(record.get("source"), dict):
+            conditional = True
+            reasons.append(f"{label} 缺少来源。")
+            flags.append(f"source_missing:{label}")
+            continue
+        source = record["source"]
+        source_moment = _as_of_moment(source["as_of"], f"pe {label} source")
+        age_days = (computed_moment - source_moment).total_seconds() / 86400
+        if age_days > STALE_SOURCE_DAYS:
+            conditional = True
+            reasons.append(f"{label} 来源距计算时点超过 {STALE_SOURCE_DAYS} 天。")
+            flags.append(f"source_stale:{label}")
+    if weighted_eps <= 0:
+        return {
+            "status": "unreliable",
+            "reasons": ["概率加权 EPS 非正，P/E 不具备经济意义。"],
+            "flags": ["non_positive_weighted_eps"],
+        }
+    if not reasons:
+        reasons.append("前瞻或正常化 EPS、情景 P/E 倍数及其来源完整。")
+    return {
+        "status": "conditional" if conditional else "usable",
+        "reasons": reasons,
+        "flags": flags,
+    }
+
+
+def _run_pe(
+    spec: dict[str, Any], computed_moment: datetime
+) -> tuple[dict[str, Any], list[str]]:
+    """Compute a scenario-based P/E reference value from explicit EPS inputs."""
+    fields, shared_provenance = _inputs_provenance(spec, ("price",), "pe")
+    missing = [name for name, value in fields.items() if value is None]
+    basis_raw = spec.get("earnings_basis")
+    if basis_raw is None:
+        missing.append("earnings_basis")
+        basis = None
+    else:
+        basis = _text(basis_raw, "pe earnings_basis")
+        if basis not in PE_EARNINGS_BASES:
+            return _invalid(
+                "pe",
+                "earnings_basis 必须是 trailing_eps、forward_eps 或 normalized_eps。",
+            )
+    rationale_raw = spec.get("basis_rationale")
+    if rationale_raw is None:
+        missing.append("basis_rationale")
+        basis_rationale = None
+    else:
+        basis_rationale = _guarded_text(rationale_raw, "pe basis_rationale")
+    raw_scenarios = spec.get("scenarios")
+    if raw_scenarios is None:
+        missing.append("scenarios")
+        scenarios: list[dict[str, Any]] = []
+        scenario_provenance: dict[str, Any] = {}
+        source_gaps: list[str] = []
+    else:
+        scenarios, scenario_missing, scenario_provenance, source_gaps = _parse_pe_scenarios(
+            raw_scenarios
+        )
+        missing.extend(scenario_missing)
+    if missing:
+        return _missing("pe", missing)
+    assert basis is not None
+    price = fields["price"]
+    if price is None or price <= 0:
+        return _invalid("pe", "price 必须为正数。")
+    probabilities = [scenario["probability"] for scenario in scenarios]
+    if any(value is None or not 0 <= value <= 1 for value in probabilities):
+        return _invalid("pe", "情景概率必须落在 [0, 1] 区间。")
+    total_probability = sum(value for value in probabilities if value is not None)
+    if abs(total_probability - 1.0) > PROBABILITY_TOLERANCE:
+        return _invalid(
+            "pe",
+            f"情景概率合计 {total_probability:.6f}，超出 1±1e-6 的容差。",
+        )
+    if any(
+        scenario["eps"] is None
+        or scenario["eps"] <= 0
+        or scenario["pe_multiple"] is None
+        or scenario["pe_multiple"] <= 0
+        for scenario in scenarios
+    ):
+        return _invalid(
+            "pe",
+            "PE 要求每个情景的 EPS 与 P/E 倍数均为正数；亏损或非正 EPS 应标记为 not_applicable。",
+        )
+    weighted_eps = sum(
+        scenario["probability"] * scenario["eps"] for scenario in scenarios
+    )
+    computed = [
+        {
+            "name": scenario["name"],
+            "probability": scenario["probability"],
+            "eps": _round6(scenario["eps"]),
+            "pe_multiple": _round6(scenario["pe_multiple"]),
+            "per_share": _round6(scenario["eps"] * scenario["pe_multiple"]),
+        }
+        for scenario in scenarios
+    ]
+    weighted = sum(
+        scenario["probability"] * entry["per_share"]
+        for scenario, entry in zip(scenarios, computed)
+    )
+    quality = _pe_quality(
+        basis,
+        shared_provenance.get("price"),
+        scenarios,
+        scenario_provenance,
+        weighted_eps,
+        computed_moment,
+    )
+    gaps: list[str] = []
+    if quality["status"] != "usable":
+        gaps.append(
+            f"pe: 质量门槛判定 {quality['status']}："
+            f"{'；'.join(quality['reasons'])}"
+        )
+    if source_gaps:
+        gaps.extend(
+            f"pe: 关键输入 {name} 缺少来源（source），模型已照算并在此标注来源缺口。"
+            for name in source_gaps
+        )
+    return (
+        {
+            "model_kind": "pe_multiple",
+            "model_version": MODEL_VERSION,
+            "method": "pe",
+            "status": "computed",
+            "earnings_basis": basis,
+            "basis_rationale": basis_rationale,
+            "scenarios": computed,
+            "probability_weighted_eps": _round6(weighted_eps),
+            "probability_weighted_per_share": _round6(weighted),
+            "value_zone": {
+                "low": _round6(min(entry["per_share"] for entry in computed)),
+                "high": _round6(weighted),
+            },
+            "current_price": _round6(price),
+            "current_pe": _round6(price / weighted_eps),
+            "quality": quality,
+            "inputs_provenance": {
+                "shared": shared_provenance,
+                "scenarios": scenario_provenance,
+            },
+            **({"source_gaps": source_gaps} if source_gaps else {}),
+        },
+        gaps,
+    )
+
+
 def _run_epv(spec: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
     fields, provenance = _inputs_provenance(spec, EPV_REQUIRED, "epv")
     missing = [name for name, value in fields.items() if value is None]
@@ -1630,6 +1902,8 @@ def compute_valuation(fixture: dict[str, Any]) -> dict[str, Any]:
             result, model_gaps = _run_reverse_dcf(spec, dcf_spec)
         elif name == "pvgo":
             result, model_gaps = _run_pvgo(spec, results.get("dcf"))
+        elif name == "pe":
+            result, model_gaps = _run_pe(spec, computed_moment)
         elif name == "epv":
             result, model_gaps = _run_epv(spec)
         elif name == "eva":

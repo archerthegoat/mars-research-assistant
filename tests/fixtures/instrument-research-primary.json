@@ -2,60 +2,95 @@
   "instrument": "NVDA",
   "research_as_of": "2026-07-26T09:00:00-04:00",
   "identity": {
-    "issuer": "NVIDIA Corporation",
+    "status": "verified",
+    "request": {
+      "company_name": "NVIDIA Corporation",
+      "ticker": "NVDA",
+      "exchange": "NASDAQ"
+    },
+    "verified": {
+      "company_name": "NVIDIA Corporation",
+      "ticker": "NVDA",
+      "exchange": "NASDAQ",
+      "issuer": "NVIDIA Corporation"
+    },
     "source": {
       "name": "2026 年 10-K",
       "kind": "sec_filing",
-      "url": "https://www.sec.gov/Archives/edgar/data/1045810/example",
-      "as_of": "2026-03-01"
+      "as_of": "2026-03-01T00:00:00-05:00",
+      "url": "https://www.sec.gov/Archives/edgar/data/1045810/example"
     }
   },
-  "fundamentals": [
+  "key_public_data": [
     {
-      "label": "收入结构",
-      "statement": "公司在年度报告中按业务和地区披露收入信息。",
+      "kind": "price",
+      "label": "收盘价",
+      "value": "182.44 USD",
       "source": {
-        "name": "2026 年 10-K",
-        "kind": "sec_filing",
-        "url": "https://www.sec.gov/Archives/edgar/data/1045810/example",
-        "as_of": "2026-03-01"
+        "name": "NASDAQ 收盘行情",
+        "kind": "public_quote",
+        "as_of": "2026-07-25T20:00:00Z",
+        "url": "https://example.com/quote/nvda"
       }
-    }
-  ],
-  "industry_context": [
+    },
     {
-      "label": "需求驱动",
-      "statement": "公司在股东信中说明数据中心需求是其经营讨论的关键主题。",
+      "kind": "market_scale_or_valuation_anchor",
+      "label": "市值",
+      "value": "4.45tn USD",
       "source": {
-        "name": "致股东信",
-        "kind": "issuer_ir",
-        "url": "https://investor.nvidia.com/example",
-        "as_of": "2026-05-20"
+        "name": "NASDAQ 收盘行情",
+        "kind": "public_quote",
+        "as_of": "2026-07-25T20:00:00Z",
+        "url": "https://example.com/quote/nvda"
       }
-    }
-  ],
-  "company_events": [
+    },
     {
-      "label": "业绩发布",
-      "statement": "发行人已发布季度业绩材料。",
+      "kind": "latest_financial_summary",
+      "label": "最新季度收入",
+      "value": "离线验收示例：最近季度收入以发行人业绩材料为准。",
       "source": {
         "name": "季度业绩新闻稿",
         "kind": "issuer_ir",
-        "url": "https://investor.nvidia.com/example-results",
-        "as_of": "2026-05-20"
+        "as_of": "2026-05-20T20:00:00Z",
+        "url": "https://investor.nvidia.com/example-results"
       }
     }
   ],
-  "inferences": [
+  "recent_company_updates": [
     {
-      "label": "经营观察",
-      "statement": "收入结构与管理层披露使数据中心需求成为后续验证重点，而不是确定性预测。",
-      "validation_condition": "后续季度披露继续确认数据中心需求。",
+      "title": "发布季度业绩材料",
+      "issuer": "NVIDIA Corporation",
+      "summary": "发行人 IR 发布最近一期季度业绩材料。",
+      "published_on": "2026-07-22",
       "source": {
-        "name": "2026 年 10-K",
-        "kind": "sec_filing",
-        "url": "https://www.sec.gov/Archives/edgar/data/1045810/example",
-        "as_of": "2026-03-01"
+        "name": "季度业绩公告",
+        "kind": "issuer_announcement",
+        "as_of": "2026-07-22T20:00:00Z",
+        "url": "https://investor.nvidia.com/example-q2"
+      }
+    },
+    {
+      "title": "数据中心产品进展报道",
+      "issuer": "NVIDIA Corporation",
+      "summary": "可信媒体报道发行人数据中心产品路线进展。",
+      "published_on": "2026-07-15",
+      "source": {
+        "name": "可信财经媒体报道",
+        "kind": "credible_media",
+        "as_of": "2026-07-15T14:30:00Z",
+        "url": "https://example.com/news/nvda-datacenter"
+      }
+    },
+    {
+      "title": "举办年度股东大会",
+      "issuer": "NVIDIA Corporation",
+      "summary": "发行人举办年度股东大会并公布表决结果。",
+      "published_on": "2026-07-08",
+      "source": {
+        "name": "股东大会公告",
+        "kind": "issuer_announcement",
+        "as_of": "2026-07-08T17:00:00Z",
+        "url": "https://investor.nvidia.com/example-agm"
       }
     }
   ],
